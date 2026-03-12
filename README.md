@@ -1,7 +1,7 @@
-# <img src="pack.svg" alt="Icon" width="35"><!-- $localAssetToURL --> Smashing<!--$headerTitle--><!--$pmc:delete-->
+# <img src="https://raw.githubusercontent.com/runcows/smashing/main/pack.svg" alt="Icon" width="35"> Smashing<!--$headerTitle--><!--$pmc:delete-->
 Arrows and Tridents can break more blocks! <!--$pmc:headerSize-->
 
-<img src="smashing.webp" alt="Showcase" width="350"> <!--$localAssetToURL--> <!--$modrinth:replaceWithVideo--> <!--$pmc:delete-->
+<img src="https://raw.githubusercontent.com/runcows/smashing/main/smashing.webp" alt="Showcase" width="350"> <!--$modrinth:replaceWithVideo--> <!--$pmc:delete-->
 
 In vanilla, Arrows and Tridents can break decorated pots and chorus flowers, and Tridents can break pointed dripstone.
 
