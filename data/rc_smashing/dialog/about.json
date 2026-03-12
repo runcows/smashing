@@ -1,0 +1,144 @@
+{
+  "type": "minecraft:multi_action",
+  "title": "Smashing",
+  "body": [
+    {
+      "type": "minecraft:plain_message",
+      "contents": "Arrows and Tridents can break more blocks!",
+      "width": 300
+    },
+    {
+      "type": "minecraft:plain_message",
+      "contents": {
+        "text": "v1.0.0\nBy runcows",
+        "color": "gray"
+      },
+      "width": 300
+    },
+    {
+      "type": "minecraft:plain_message",
+      "contents": [
+        "",
+        {
+          "text": "Arrow Breakable:\n\n",
+          "bold": true,
+          "underlined": true
+        },
+        {
+          "sprite": "item/candle",
+          "atlas": "items"
+        },
+        " Candles        ",
+        {
+          "sprite": "item/cake",
+          "atlas": "items"
+        },
+        " Cakes           ",
+        {
+          "sprite": "block/cactus_side",
+          "atlas": "blocks"
+        },
+        " Cactus\n ",
+        {
+          "sprite": "item/flower_pot",
+          "atlas": "items"
+        },
+        " Flower Pots    ",
+        {
+          "sprite": "block/glass",
+          "atlas": "blocks"
+        },
+        " Glass Panes   ",
+        {
+          "sprite": "item/sea_pickle",
+          "atlas": "items"
+        },
+        " Sea Pickle\n",
+        {
+          "sprite": "block/big_dripleaf_top",
+          "atlas": "blocks"
+        },
+        " Big Dripleaf      ",
+        {
+          "sprite": "block/lily_pad",
+          "color": "#00FF00",
+          "atlas": "blocks"
+        },
+        " Lily Pad        ",
+        {
+          "sprite": "block/melon_side",
+          "atlas": "blocks"
+        },
+        " Melon    \n       ",
+        {
+          "sprite": "block/pumpkin_side",
+          "atlas": "blocks"
+        },
+        " Pumpkin       ",
+        {
+          "sprite": "block/carved_pumpkin",
+          "atlas": "blocks"
+        },
+        " Carved Pumpkin  ",
+        {
+          "sprite": "block/jack_o_lantern",
+          "atlas": "blocks"
+        },
+        " Jack o'Lantern"
+      ],
+      "width": 300
+    },
+    {
+      "type": "minecraft:plain_message",
+      "contents": [
+        "",
+        {
+          "text": "Trident Breakable:\n\n",
+          "bold": true,
+          "underlined": true
+        },
+        "Everything an arrow can break and...\n",
+        {
+          "sprite": "item/bamboo",
+          "atlas": "items"
+        },
+        " Bamboo\n",
+        {
+          "sprite": "item/cocoa_beans",
+          "atlas": "items"
+        },
+        " Cocoa Beans\n",
+        {
+          "sprite": "item/happy_ghast_spawn_egg",
+          "atlas": "items"
+        },
+        " Dried Ghast\n",
+        {
+          "sprite": "item/amethyst_shard",
+          "atlas": "items"
+        },
+        " Amethyst Clusters & Buds"
+      ],
+      "width": 300
+    }
+  ],
+  "actions": [
+    {
+      "label": "Issues",
+      "action": {
+        "type": "open_url",
+        "url": "https://github.com/runcows/smashing/issues"
+      }
+    }
+  ],
+  "exit_action": {
+    "action": {
+      "type": "show_dialog",
+      "dialog": "smithed:data_packs"
+    },
+    "label": {
+      "translate": "gui.back"
+    },
+    "width": 200
+  }
+}

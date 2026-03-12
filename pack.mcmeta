@@ -1,0 +1,33 @@
+{
+  "id": "rc_smashing",
+  "pack": {
+    "pack_format": 81,
+    "supported_formats": {
+      "min_inclusive": 81,
+      "max_inclusive": 94
+    },
+    "min_format": 81,
+    "max_format": [94,1],
+    "description": [
+      "Smashing",
+      "\n",
+      {
+        "text": "runcows",
+        "color": "#da3eb3"
+      }
+    ]
+  },
+  "overlays": {
+    "entries": [
+      {
+        "directory": "backport_81",
+        "formats": {
+          "min_inclusive": 81,
+          "max_inclusive": 88
+        },
+        "min_format": [81,0],
+        "max_format": [88,0]
+      }
+    ]
+  }
+}
