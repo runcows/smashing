@@ -1,4 +1,5 @@
 scoreboard players set rc_smashing load.status 1
+scoreboard players set rc_smashing_minor load.status 0
 
 scoreboard objectives add rc_smashing.misc dummy
 
