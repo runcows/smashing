@@ -10,7 +10,7 @@
     {
       "type": "minecraft:plain_message",
       "contents": {
-        "text": "v1.0.1\nBy runcows",
+        "text": "v1.1.0\nBy runcows",
         "color": "gray"
       },
       "width": 300
