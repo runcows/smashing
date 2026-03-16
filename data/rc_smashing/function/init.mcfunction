@@ -1,5 +1,5 @@
 scoreboard players set rc_smashing load.status 1
-scoreboard players set rc_smashing_minor load.status 1
+scoreboard players set rc_smashing_minor load.status 2
 
 scoreboard objectives add rc_smashing.misc dummy
 scoreboard objectives add rc_smashing.PierceLevel dummy
@@ -11,3 +11,5 @@ scoreboard objectives add rc_smashing.PierceLevel dummy
 forceload add 29999999 3132
 # UUID = 72756E63-6F77-73-BEC7-F04CE104D
 summon marker 29999999 ~ 3132 {Tags:["rc_smashing.forceload_marker"],UUID:[I;1920298595,1870069875,-1094254577,80613453]}
+
+schedule function rc_smashing:slow_clock 1t

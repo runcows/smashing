@@ -4,10 +4,10 @@
 execute as @e[type=#minecraft:arrows,tag=rc_smashing.reapply] run function rc_smashing:arrow/reapply_data
 
 # arrow
-execute as @e[type=#minecraft:arrows,tag=rc_smashing.at_speed,predicate=rc_smashing:not_moving] \
+execute as @e[type=#minecraft:arrows,tag=rc_smashing.at_speed,predicate=rc_smashing:not_moving] if function rc_smashing:check_origin \
   run function rc_smashing:arrow/attempt_smash
 # trident
-execute as @e[tag=rc_smashing.at_speed,predicate=rc_smashing:not_moving,type=trident] \
+execute as @e[tag=rc_smashing.at_speed,predicate=rc_smashing:not_moving,type=trident] if function rc_smashing:check_origin \
   run function rc_smashing:trident/attempt_smash
 
 # update speed tracking
