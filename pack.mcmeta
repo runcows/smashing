@@ -1,15 +1,10 @@
 {
   "id": "rc_smashing",
   "pack": {
-    "pack_format": 81,
-    "supported_formats": {
-      "min_inclusive": 81,
-      "max_inclusive": 94
-    },
-    "min_format": 81,
-    "max_format": [94,1],
+    "min_format": 101,
+    "max_format": 101,
     "description": [
-      "Smashing v1.2.1",
+      "Smashing v1.2.2",
       "\n",
       {
         "text": "runcows",

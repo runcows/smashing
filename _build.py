@@ -3,9 +3,9 @@ import os
 import zipfile, shutil
 
 __name__ = "smashing"
-__version__ = "1.2.1"
+__version__ = "1.2.2"
 
-MC_VERSION_RANGE = "1.21.8-11"
+MC_VERSION_RANGE = "26.1"
 
 
 ######################################
@@ -13,7 +13,6 @@ MC_VERSION_RANGE = "1.21.8-11"
 ######################################
 PATHS_REPLACE_VERSION_NUM = [
   "data/rc_smashing/dialog/about.json",
-  "backport_81/data/rc_smashing/dialog/about.json",
   "pack.mcmeta"
 ]
 PATHS_REPLACE_LOAD_STATUS = [
@@ -51,7 +50,6 @@ datapack_out = PATH_OUTPUT + f"{MC_VERSION_RANGE}_{__name__}_v{__version__}.zip"
 
 include = [
   "data/",
-  "backport_81/",
   "pack.mcmeta",
   "pack.png",
   "LICENSE"
