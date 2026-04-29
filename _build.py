@@ -3,7 +3,7 @@ import os
 import zipfile, shutil
 
 __name__ = "smashing"
-__version__ = "1.2.2"
+__version__ = "1.3.0"
 
 MC_VERSION_RANGE = "26.1"
 

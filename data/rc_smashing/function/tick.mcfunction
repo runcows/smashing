@@ -1,5 +1,7 @@
 # run from #minecraft:tick
 
+execute if score $projectiles_can_break_blocks rc_smashing.misc matches 0 run return fail
+
 # reapply piercing arrow data
 execute as @e[type=#minecraft:arrows,tag=rc_smashing.reapply] run function rc_smashing:arrow/reapply_data
 
