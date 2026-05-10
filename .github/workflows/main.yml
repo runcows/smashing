@@ -16,7 +16,7 @@ jobs:
       - name: Load Version Number
         run: |
           VERSION=$(yq '.version' beet.yaml)
-          echo VERSION = $VERSION
+          echo VERSION = $VERSION >> $GITHUB_ENV
       - name: Set up uv
         uses: astral-sh/setup-uv@v7
       - name: Build Pack
