@@ -1,0 +1,12 @@
+[project]
+dependencies = [
+    "beet>=0.115.0",
+    "bolt>=0.50.1",
+    "bolt-native-macros>=0.5.1",
+    "mecha>=0.103.0",
+]
+description = "The Smashing Datapack Github Repo"
+name = "Smashing"
+readme = "README.md"
+requires-python = ">=3.14"
+version = "0.0.0"

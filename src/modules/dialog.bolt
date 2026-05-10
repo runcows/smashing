@@ -1,4 +1,51 @@
-{
+dialog_tag minecraft:pause_screen_additions {
+  "values": [
+    {
+      "id": "smithed:data_packs",
+      "required": false
+    }
+  ]
+}
+
+dialog smithed:data_packs {
+  "type": "minecraft:dialog_list",
+  "external_title": {
+    "translate": "menu.smithed.data_packs",
+    "fallback": "%s...",
+    "with": [
+      {
+        "translate": "selectWorld.dataPacks"
+      }
+    ]
+  },
+  "title": {
+    "translate": "menu.smithed.data_packs.title",
+    "fallback": "%s",
+    "with": [
+      {
+        "translate": "selectWorld.dataPacks"
+      }
+    ]
+  },
+  "dialogs": "#smithed:data_packs",
+  "exit_action": {
+    "label": {
+      "translate": "gui.back"
+    },
+    "width": 200
+  }
+}
+
+dialog_tag smithed:data_packs {
+  "values": [
+    {
+      "id": (./about),
+      "required": false
+    }
+  ]
+}
+
+dialog ./about {
   "type": "minecraft:multi_action",
   "title": "Smashing",
   "body": [
@@ -10,7 +57,7 @@
     {
       "type": "minecraft:plain_message",
       "contents": {
-        "text": "v1.3.0\nBy runcows",
+        "text": ("v" + ctx.project_version + "\nBy runcows"),
         "color": "gray"
       },
       "width": 300
