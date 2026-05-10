@@ -1,7 +1,8 @@
 on:
   push:
     branches:
-      - main
+      # - main
+      - bolt-rewrite
   workflow_dispatch:
 env:
   COMMIT_MSG: ${{ github.event.head_commit.message }}
@@ -11,6 +12,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        # comment out this with block later
+        with:
+          ref: bolt-rewrite
       - name: Load Values From Beet.yaml
         run: |
           VERSION=$(yq '.version' beet.yaml)
