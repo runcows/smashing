@@ -4,7 +4,6 @@ on:
       - main
   workflow_dispatch:
 env:
-  MC_VERSION: '26.1'
   COMMIT_MSG: ${{ github.event.head_commit.message }}
 jobs:
   build:
@@ -12,10 +11,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Load Version Number
+      - name: Load Values From Beet.yaml
         run: |
           VERSION=$(yq '.version' beet.yaml)
           echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo VERSION = $VERSION
+          MC_VERSION=$(yq '.minecraft' beet.yaml)
+          echo "MC_VERSION=$MC_VERSION" >> $GITHUB_ENV
+          echo MC_VERSION = $MC_VERSION
       - name: Set up uv
         uses: astral-sh/setup-uv@v7
       - name: Build Pack
