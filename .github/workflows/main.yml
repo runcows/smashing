@@ -1,0 +1,31 @@
+on:
+  push:
+    branches:
+      - main
+      - bolt-rewrite
+  workflow_dispatch:
+env:
+  MC_VERSION: '26.1'
+  COMMIT_MSG: ${{ github.event.head_commit.message }}
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Load Version Number
+        run: |
+          VERSION=$(yq '.version' beet.yaml)
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7
+      - name: Build Pack
+        run: uv run beet build
+      - name: Create Github Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create v$VERSION \
+            --fail-on-no-commits \
+            --title "v$VERSION" \
+            --notes "$COMMIT_MSG" \
+            ./out/*.zip
