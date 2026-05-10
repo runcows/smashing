@@ -2,7 +2,6 @@ on:
   push:
     branches:
       - main
-      - bolt-rewrite
   workflow_dispatch:
 env:
   MC_VERSION: '26.1'
