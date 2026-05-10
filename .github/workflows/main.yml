@@ -22,7 +22,7 @@ jobs:
         run: uv run beet build
       - name: Create Github Release
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           gh release create v$VERSION \
             --fail-on-no-commits \
