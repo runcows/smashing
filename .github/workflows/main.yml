@@ -16,6 +16,7 @@ jobs:
       - name: Load Version Number
         run: |
           VERSION=$(yq '.version' beet.yaml)
+          echo VERSION = $VERSION
       - name: Set up uv
         uses: astral-sh/setup-uv@v7
       - name: Build Pack
