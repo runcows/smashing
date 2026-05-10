@@ -3,6 +3,7 @@ dependencies = [
     "beet>=0.115.0",
     "bolt>=0.50.1",
     "bolt-native-macros>=0.5.1",
+    "jinja2>=3.1.6",
     "mecha>=0.103.0",
 ]
 description = "The Smashing Datapack Github Repo"

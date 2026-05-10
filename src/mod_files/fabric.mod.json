@@ -1,19 +1,19 @@
 {
   "schemaVersion":1,
-  "id":"mr_rc_smashing",
-  "version":"1.3.0",
-  "name":"Smashing",
-  "description":"Arrows and Tridents can break more blocks!",
+  "id":"mr_{{ id }}",
+  "version":"{{ version }}",
+  "name":"{{ name }}",
+  "description":"{{ description }}",
   "authors":[
-    "runcows"
+    "{{ author }}"
   ],
   "contact":{
-    "homepage":"https://modrinth.com/datapack/rc_smashing",
-    "sources":"https://github.com/runcows/smashing",
-    "issues":"https://github.com/runcows/smashing/issues"
+    "homepage":"{{ modrinth_page }}",
+    "sources":"{{ github_page }}",
+    "issues":"{{ github_page }}/issues"
   },
   "license":"GPL-3.0-only",
-  "icon":"rc_smashing_pack.png",
+  "icon":"{{ id }}_pack.png",
   "environment":"*",
   "depends":{
     "fabric-resource-loader-v0":"*"

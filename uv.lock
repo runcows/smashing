@@ -319,6 +319,7 @@ dependencies = [
     { name = "beet" },
     { name = "bolt" },
     { name = "bolt-native-macros" },
+    { name = "jinja2" },
     { name = "mecha" },
 ]
 
@@ -327,6 +328,7 @@ requires-dist = [
     { name = "beet", specifier = ">=0.115.0" },
     { name = "bolt", specifier = ">=0.50.1" },
     { name = "bolt-native-macros", specifier = ">=0.5.1" },
+    { name = "jinja2", specifier = ">=3.1.6" },
     { name = "mecha", specifier = ">=0.103.0" },
 ]
 
