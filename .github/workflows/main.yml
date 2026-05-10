@@ -32,8 +32,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release create v$VERSION \
-            --target bolt-rewrite \
-            --fail-on-no-commits \
             --title "v$VERSION" \
             --notes "$COMMIT_MSG" \
             ./out/*.zip
+        # --fail-on-no-commits
