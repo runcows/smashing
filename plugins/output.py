@@ -157,13 +157,15 @@ def publish(ctx: Context, zip_name: str, jar_name: str):
     )
     if not (200 <= res.status_code < 300):
         raise RuntimeError(f"MODRINTH: Failed to get project... {res.status_code} {res.text}")
-    if res.json()["body"] != current_readme:
+    with open("README.md") as readme:
+        readme_text = readme.read()
+    if res.json()["body"] != readme_text:
         print("MODRINTH: Updating Project Description")
         res = requests.patch(
             f"{MODRINTH_API}/project/{MODRINTH_PROJECT_ID}",
             headers = {'Authorization': MODRINTH_AUTH, 'User-Agent': USER_AGENT},
             json = {
-                "body": current_readme
+                "body": readme_text
             }
         )
         if not (200 <= res.status_code < 300):
