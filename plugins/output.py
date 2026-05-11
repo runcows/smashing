@@ -210,7 +210,7 @@ def publish(ctx: Context, zip_name: str, jar_name: str):
         files = {
             "data": json.dumps({
                 "name": f"{ctx.project_name} {ctx.project_version}",
-                "version_number": ctx.project_version,
+                "version_number": f"{ctx.project_version}+mod",
                 "changelog": COMMIT_MESSAGE,
                 "dependencies": [],
                 "game_versions": ctx.meta["supported_versions"],
