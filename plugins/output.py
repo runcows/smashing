@@ -176,7 +176,7 @@ def publish(ctx: Context, zip_name: str, jar_name: str):
     if matching_version is not None:
         raise ValueError("MODRINTH: Version exists already.")
     # - Post Zip
-    with open("out" / f"{zip_name}.zip") as zf:
+    with open(f"out/{zip_name}.zip") as zf:
         zip_bytes = zf.read()
     res = requests.post(
         f"{MODRINTH_API}/version",
@@ -201,7 +201,7 @@ def publish(ctx: Context, zip_name: str, jar_name: str):
         raise ValueError(f"MODRINTH: Failed to publish Zip... {res.status_code} {res.text}")
     print(f"MODRINTH: Successfully Published Zip {res.json()["name"]}")
     # - Post Jar
-    with open("out" / f"{jar_name}.zip") as jf:
+    with open(f"out/{jar_name}.zip") as jf:
         jar_bytes = jf.read()
     res = requests.post(
         f"{MODRINTH_API}/version",
