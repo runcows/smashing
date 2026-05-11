@@ -128,7 +128,7 @@ def publish(ctx: Context, zip_name: str, jar_name: str):
                     "resourcepack": ""
                 },
                 "name": ctx.project_version,
-                "supports": ctx.minecraft_version,
+                "supports": [ctx.minecraft_version],
                 "dependencies": []
             }
         }
