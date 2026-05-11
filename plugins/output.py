@@ -27,7 +27,7 @@ MODRINTH_PROJECT_ID = "h3NiCjT1"
 
 def clear(ctx: Context):
     shutil.rmtree("out",ignore_errors=True)
-    
+
 def beet_default(ctx: Context):
     yield
     ctx.data[Module].clear()
