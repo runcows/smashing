@@ -29,6 +29,11 @@ pipeline:
   - plugins.output
 
 meta:
+  supported_versions: [
+    "26.1",
+    "26.1.1",
+    "26.1.2"
+  ]
   copy_files:
     data_pack:
       LICENSE: LICENSE

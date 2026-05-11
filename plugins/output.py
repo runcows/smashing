@@ -75,6 +75,8 @@ def mod_output(ctx: Context, zip_name: str) -> str:
 
 def publish(ctx: Context, zip_name: str, jar_name: str):
     # github release
+    if not SMITHED_AUTH:
+        raise ValueError("NO SMITHED AUTH KEY")
     g = Github(GH_TOKEN)
     repo = g.get_repo(REPO_LOCATION)
     release = repo.create_git_release(
@@ -130,12 +132,11 @@ def publish(ctx: Context, zip_name: str, jar_name: str):
                     "resourcepack": ""
                 },
                 "name": ctx.project_version,
-                "supports": ctx.minecraft_version,
+                "supports": ctx.meta["supported_versions"],
                 "dependencies": []
             }
         }
     )
     if not (200 <= res.status_code < 300):
-        print(f"Failed to publish... {res.status_code} {res.text}")
-        return
+        raise ValueError(f"Failed to publish... {res.status_code} {res.text}")
     print(res.text)
