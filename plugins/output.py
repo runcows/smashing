@@ -94,7 +94,7 @@ def publish(ctx: Context, zip_name: str, jar_name: str):
     # Smithed
     res = requests.get(f"{SMITHED_API}/packs/{ctx.project_id}")
     if not (200 <= res.status_code < 300):
-        print("Failed to get project.")
+        print(f"Failed to get project... {res.status_code} {res.text}")
         return
     project_json = res.json()
     project_versions = project_json["versions"]
@@ -114,7 +114,7 @@ def publish(ctx: Context, zip_name: str, jar_name: str):
             }
         )
         if not (200 <= res.status_code < 300):
-            print(f"Status {res.status_code}: failed to update project description")
+            print(f"Failed to update project description... {res.status_code} {res.text}")
     matching_version = next((v for v in project_versions if v["name"] == ctx.project_version), None)
     if matching_version is not None:
         raise ValueError("Version exists already.")
@@ -128,12 +128,12 @@ def publish(ctx: Context, zip_name: str, jar_name: str):
                     "resourcepack": ""
                 },
                 "name": ctx.project_version,
-                "supports": [ctx.minecraft_version],
+                "supports": ctx.minecraft_version,
                 "dependencies": []
             }
         }
     )
     if not (200 <= res.status_code < 300):
-        print(f"Status {res.status_code}: failed to publish")
+        print(f"Failed to publish... {res.status_code} {res.text}")
         return
     print(res.text)
