@@ -1,0 +1,74 @@
+id: rc_smashing
+name: Smashing
+author: runcows
+description: Arrows and Tridents can break more blocks!
+
+version: 1.3.1
+minecraft: "26.1"
+
+output: out
+
+data_pack:
+  load: 
+    # data: src/data
+    data/rc_smashing/modules: src/modules
+  name: smashing_dev
+  zipped: false
+
+require:
+  - plugins.output.clear
+  - beet.contrib.model_merging
+  - beet.contrib.copy_files
+  - bolt
+  - bolt_native_macros
+
+pipeline:
+  - plugins.write_mcmeta
+  - mecha
+  # no minify_json, that's handled by plugins.output
+  - plugins.output
+
+meta:
+  supported_versions: [
+    "26.1",
+    "26.1.1",
+    "26.1.2"
+  ]
+  copy_files:
+    data_pack:
+      LICENSE: LICENSE
+      pack.png: pack.png
+  mecha:
+    formatting: 
+      # layout: preserve
+      nbt_compact: True
+  bolt:
+    entrypoint: ["*"]
+  smashing:
+    arrow_smashable: [
+      "#minecraft:candles",
+      "#minecraft:candle_cakes",
+      "#minecraft:flower_pots",
+      "#rc_smashing:glass_panes",
+      "minecraft:big_dripleaf",
+      "minecraft:cactus",
+      "minecraft:cake",
+      "minecraft:carved_pumpkin",
+      "minecraft:chorus_flower",
+      "minecraft:decorated_pot",
+      "minecraft:jack_o_lantern",
+      "minecraft:lily_pad",
+      "minecraft:melon",
+      "minecraft:pumpkin",
+      "minecraft:sea_pickle"
+    ]
+    trident_smashable: [
+      "#rc_smashing:arrow_smashable",
+      "minecraft:amethyst_cluster",
+      "minecraft:bamboo",
+      "minecraft:cocoa",
+      "minecraft:dried_ghast",
+      "minecraft:large_amethyst_bud",
+      "minecraft:medium_amethyst_bud",
+      "minecraft:small_amethyst_bud"
+    ]

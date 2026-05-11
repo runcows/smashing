@@ -1,0 +1,21 @@
+{
+  "schemaVersion":1,
+  "id":"mr_{{ id }}",
+  "version":"{{ version }}",
+  "name":"{{ name }}",
+  "description":"{{ description }}",
+  "authors":[
+    "{{ author }}"
+  ],
+  "contact":{
+    "homepage":"{{ modrinth_page }}",
+    "sources":"{{ github_page }}",
+    "issues":"{{ github_page }}/issues"
+  },
+  "license":"GPL-3.0-only",
+  "icon":"{{ id }}_pack.png",
+  "environment":"*",
+  "depends":{
+    "fabric-resource-loader-v0":"*"
+  }
+}

@@ -1,0 +1,37 @@
+function load:_private/init:
+    raw # Reset scoreboards so packs can set values accurate for current load.
+    scoreboard objectives add load.status dummy
+    scoreboard players reset * load.status
+
+function_tag minecraft:load {
+    "values": [
+        "#load:_private/load"
+    ]
+}
+
+function_tag load:_private/init {
+    "values": [
+        "load:_private/init"
+    ]
+}
+
+function_tag load:_private/load {
+    "values": [
+        "#load:_private/init",
+        {"id": "#load:pre_load", "required": false},
+        {"id": "#load:load", "required": false},
+        {"id": "#load:post_load", "required": false}
+    ]
+}
+
+function_tag load:pre_load {
+    "values": []
+}
+
+function_tag load:load {
+    "values": []
+}
+
+function_tag load:post_load {
+    "values": []
+}

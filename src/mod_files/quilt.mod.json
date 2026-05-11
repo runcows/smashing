@@ -1,0 +1,29 @@
+{
+  "schema_version":1,
+  "quilt_loader":{
+    "group":"com.modrinth",
+    "id":"mr_{{ id }}",
+    "version":"{{ version }}",
+    "metadata":{
+      "name":"{{ name }}",
+      "description":"{{ description }}",
+      "contributors":{
+        "{{ author }}":"Member"
+      },
+      "contact":{
+        "homepage":"{{ modrinth_page }}",
+        "sources":"{{ github_page }}",
+        "issues":"{{ github_page }}/issues"
+      },
+      "icon":"{{ id }}_pack.png"
+    },
+    "intermediate_mappings":"net.fabricmc:intermediary",
+    "depends":[
+      {
+        "id":"quilt_resource_loader",
+        "versions":"*",
+        "unless":"fabric-resource-loader-v0"
+      }
+    ]
+  }
+}
