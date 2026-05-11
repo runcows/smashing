@@ -7,6 +7,7 @@ on:
 env:
   COMMIT_MSG: ${{ github.event.head_commit.message }}
   GH_TOKEN: ${{ github.token }}
+  SMITHED_AUTH_KEY: ${{ secrets.SMITHED_AUTH_KEY }}
 jobs:
   build:
     runs-on: ubuntu-latest
