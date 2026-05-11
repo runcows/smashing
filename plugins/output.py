@@ -225,4 +225,3 @@ def publish(ctx: Context, zip_name: str, jar_name: str):
     if not (200 <= res.status_code < 300):
         raise ValueError(f"MODRINTH: Failed to publish Jar... {res.status_code} {res.text}")
     print(f"MODRINTH: Successfully Published Jar {res.json()["name"]}")
-    
