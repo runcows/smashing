@@ -1,12 +1,13 @@
 from beet import Context
 from beet.contrib.format_json import format_json
 from bolt import Module
+from github import Github
+from importlib import resources
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 import os
 from pathlib import Path
 import shutil
 import zipfile
-from importlib import resources
 
 TEMPLATES = resources.files("src") / "mod_files"
 env = Environment(
@@ -14,6 +15,9 @@ env = Environment(
     autoescape=select_autoescape()
 )
 COMMIT_MESSAGE = os.getenv("COMMIT_MSG")
+GH_TOKEN = os.getenv("GH_TOKEN")
+g = Github(GH_TOKEN)
+repo = g.get_repo("runcows/smashing")
 
 
 def clear(ctx: Context):
@@ -32,6 +36,15 @@ def beet_default(ctx: Context):
         zipped=True,
         overwrite=True,
     )
+    
+    release = repo.create_git_release(
+        tag=f"v{ctx.project_version}",
+        name=f"v{ctx.project_version}",
+        message=COMMIT_MESSAGE,
+        draft=False,
+        prerelease=False
+    )
+    release.upload_asset(path=f"out/{output_name}.zip")
     
     # reset for dev output pack
     ctx.require(format_json(indent=2, separators=(",", ":"), final_newline=True))

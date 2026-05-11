@@ -6,6 +6,7 @@ on:
   workflow_dispatch:
 env:
   COMMIT_MSG: ${{ github.event.head_commit.message }}
+  GH_TOKEN: ${{ github.token }}
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -15,24 +16,24 @@ jobs:
         # comment out this with block later
         with:
           ref: bolt-rewrite
-      - name: Load Values From Beet.yaml
-        run: |
-          VERSION=$(yq '.version' beet.yaml)
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo VERSION = $VERSION
-          MC_VERSION=$(yq '.minecraft' beet.yaml)
-          echo "MC_VERSION=$MC_VERSION" >> $GITHUB_ENV
-          echo MC_VERSION = $MC_VERSION
+      # - name: Load Values From Beet.yaml
+      #   run: |
+      #     VERSION=$(yq '.version' beet.yaml)
+      #     echo "VERSION=$VERSION" >> $GITHUB_ENV
+      #     echo VERSION = $VERSION
+      #     MC_VERSION=$(yq '.minecraft' beet.yaml)
+      #     echo "MC_VERSION=$MC_VERSION" >> $GITHUB_ENV
+      #     echo MC_VERSION = $MC_VERSION
       - name: Set up uv
         uses: astral-sh/setup-uv@v7
       - name: Build Pack
         run: uv run beet build
-      - name: Create Github Release
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh release create v$VERSION \
-            --title "v$VERSION" \
-            --notes "$COMMIT_MSG" \
-            ./out/*.zip
-        # --fail-on-no-commits
+      # - name: Create Github Release
+      #   env:
+      #     GH_TOKEN: ${{ github.token }}
+      #   run: |
+      #     gh release create v$VERSION \
+      #       --title "v$VERSION" \
+      #       --notes "$COMMIT_MSG" \
+      #       ./out/*.zip
+      #   # --fail-on-no-commits
