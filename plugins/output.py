@@ -13,7 +13,7 @@ env = Environment(
     loader=FileSystemLoader(TEMPLATES),
     autoescape=select_autoescape()
 )
-COMMIT_MESSAGE = "COMMIT_MSG"
+COMMIT_MESSAGE = os.getenv("COMMIT_MSG")
 
 
 def clear(ctx: Context):
