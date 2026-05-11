@@ -4,6 +4,7 @@ from bolt import Module
 from github import Github
 from importlib import resources
 from jinja2 import Environment, FileSystemLoader, select_autoescape
+import json
 import os
 from pathlib import Path
 import requests
@@ -157,7 +158,7 @@ def publish(ctx: Context, zip_name: str, jar_name: str):
     if res.json()["body"] != current_readme:
         print("MODRINTH: Updating Project Description")
         res = requests.patch(
-            f"{MODRINTH_API}/projects/{MODRINTH_PROJECT_ID}",
+            f"{MODRINTH_API}/project/{MODRINTH_PROJECT_ID}",
             headers = {'Authorization': MODRINTH_AUTH, 'User-Agent': USER_AGENT},
             json = {
                 "body": current_readme
@@ -182,7 +183,7 @@ def publish(ctx: Context, zip_name: str, jar_name: str):
         f"{MODRINTH_API}/version",
         headers = {'Authorization': MODRINTH_AUTH, 'User-Agent': USER_AGENT},
         files = {
-            "data": {
+            "data": json.dumps({
                 "name": f"{ctx.project_name} {ctx.project_version}",
                 "version_number": ctx.project_version,
                 "changelog": COMMIT_MESSAGE,
@@ -193,7 +194,7 @@ def publish(ctx: Context, zip_name: str, jar_name: str):
                 "featured": False,
                 "project_id": MODRINTH_PROJECT_ID,
                 "file_parts": [f"{zip_name}.zip"]
-            },
+            }),
             f"{zip_name}.zip": zip_bytes
         }
     )
@@ -207,7 +208,7 @@ def publish(ctx: Context, zip_name: str, jar_name: str):
         f"{MODRINTH_API}/version",
         headers = {'Authorization': MODRINTH_AUTH, 'User-Agent': USER_AGENT},
         files = {
-            "data": {
+            "data": json.dumps({
                 "name": f"{ctx.project_name} {ctx.project_version}",
                 "version_number": ctx.project_version,
                 "changelog": COMMIT_MESSAGE,
@@ -218,7 +219,7 @@ def publish(ctx: Context, zip_name: str, jar_name: str):
                 "featured": False,
                 "project_id": MODRINTH_PROJECT_ID,
                 "file_parts": [f"{jar_name}.jar"]
-            },
+            }),
             f"{jar_name}.zip": jar_bytes
         }
     )
