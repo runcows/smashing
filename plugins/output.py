@@ -107,9 +107,11 @@ def publish(ctx: Context, zip_name: str, jar_name: str):
             f"{SMITHED_API}/packs/{ctx.project_id}",
             params = {'token': SMITHED_AUTH},
             json = {
-                "display": {
-                    "icon": current_icon,
-                    "webPage": current_readme
+                "data": {
+                    "display": {
+                        "icon": current_icon,
+                        "webPage": current_readme
+                    }
                 }
             }
         )
