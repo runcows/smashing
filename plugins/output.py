@@ -6,12 +6,14 @@ import os
 from pathlib import Path
 import shutil
 import zipfile
+from importlib import resources
 
-TEMPLATES = "src/mod_files"
+TEMPLATES = resources.files("src") / "mod_files"
 env = Environment(
     loader=FileSystemLoader(TEMPLATES),
     autoescape=select_autoescape()
 )
+COMMIT_MESSAGE = "COMMIT_MSG"
 
 
 def clear(ctx: Context):
@@ -34,6 +36,7 @@ def beet_default(ctx: Context):
     # reset for dev output pack
     ctx.require(format_json(indent=2, separators=(",", ":"), final_newline=True))
     
+    print(COMMIT_MESSAGE)
     mod_output(ctx, output_name)
 
 def mod_output(ctx: Context, zip_name: str):
