@@ -1,8 +1,7 @@
 on:
   push:
     branches:
-      # - main
-      - bolt-rewrite
+      - main
   workflow_dispatch:
 env:
   COMMIT_MSG: ${{ github.event.head_commit.message }}
@@ -15,9 +14,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        # comment out this with block later
-        with:
-          ref: bolt-rewrite
       - name: Set up uv
         uses: astral-sh/setup-uv@v7
       - name: Build Pack & Release
