@@ -202,7 +202,7 @@ def publish(ctx: Context, zip_name: str, jar_name: str):
         raise ValueError(f"MODRINTH: Failed to publish Zip... {res.status_code} {res.text}")
     print(f"MODRINTH: Successfully Published Zip {res.json()["name"]}")
     # - Post Jar
-    with open(f"out/{jar_name}.zip", "rb") as jf:
+    with open(f"out/{jar_name}.jar", "rb") as jf:
         jar_bytes = jf.read()
     res = requests.post(
         f"{MODRINTH_API}/version",
@@ -220,7 +220,7 @@ def publish(ctx: Context, zip_name: str, jar_name: str):
                 "project_id": MODRINTH_PROJECT_ID,
                 "file_parts": [f"{jar_name}.jar"]
             }),
-            f"{jar_name}.zip": jar_bytes
+            f"{jar_name}.jar": jar_bytes
         }
     )
     if not (200 <= res.status_code < 300):
