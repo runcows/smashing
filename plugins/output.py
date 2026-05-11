@@ -30,29 +30,21 @@ def beet_default(ctx: Context):
     # minify json for release pack
     ctx.require(format_json(indent=None, separators=(",", ":"), final_newline=False))
     
-    output_name = f"{ctx.minecraft_version}_{ctx.project_name}_v{ctx.project_version}"
+    zip_name = f"{ctx.minecraft_version}_{ctx.project_name}_v{ctx.project_version}"
     ctx.data.save(
-        path = Path("out") / output_name,
+        path = Path("out") / zip_name,
         zipped=True,
         overwrite=True,
     )
     
-    release = repo.create_git_release(
-        tag=f"v{ctx.project_version}",
-        name=f"v{ctx.project_version}",
-        message=COMMIT_MESSAGE,
-        draft=False,
-        prerelease=False
-    )
-    release.upload_asset(path=f"out/{output_name}.zip")
-    
     # reset for dev output pack
     ctx.require(format_json(indent=2, separators=(",", ":"), final_newline=True))
     
-    print(COMMIT_MESSAGE)
-    mod_output(ctx, output_name)
+    jar_name = mod_output(ctx, zip_name)
+    
+    publish(ctx, zip_name, jar_name)
 
-def mod_output(ctx: Context, zip_name: str):
+def mod_output(ctx: Context, zip_name: str) -> str:
     jar_name = f"{ctx.project_id}-{ctx.project_version}"
     shutil.copy(f"out/{zip_name}.zip", f"out/{jar_name}.jar")
     with zipfile.ZipFile(f"out/{jar_name}.jar", 'a') as jar:
@@ -71,4 +63,17 @@ def mod_output(ctx: Context, zip_name: str):
                     github_page = "https://github.com/runcows/smashing",
                 )
                 jar.writestr(relative_path, rendered_template)
+    return jar_name
                 
+def publish(ctx: Context, zip_name: str, jar_name: str):
+    # github release
+    release = repo.create_git_release(
+        tag=f"v{ctx.project_version}",
+        name=f"v{ctx.project_version}",
+        message=COMMIT_MESSAGE,
+        draft=False,
+        prerelease=False
+    )
+    release.upload_asset(path=f"out/{zip_name}.zip")
+    for asset in release.get_assets():
+        print(asset.browser_download_url)

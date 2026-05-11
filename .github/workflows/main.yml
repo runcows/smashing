@@ -26,7 +26,7 @@ jobs:
       #     echo MC_VERSION = $MC_VERSION
       - name: Set up uv
         uses: astral-sh/setup-uv@v7
-      - name: Build Pack
+      - name: Build Pack & Release
         run: uv run beet build
       # - name: Create Github Release
       #   env:
