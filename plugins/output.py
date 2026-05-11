@@ -46,7 +46,7 @@ def mod_output(ctx: Context, zip_name: str):
         jar.write('pack.png', arcname=f"{ctx.project_id}_pack.png")
         for root, dirs, files in os.walk(TEMPLATES):
             for file in files:
-                relative_path = os.path.join(root,file).removeprefix(f"{TEMPLATES}\\").replace("\\","/")
+                relative_path = os.path.join(root,file).removeprefix(f"{TEMPLATES}").removeprefix("/").removeprefix("\\").replace("\\","/")
                 template = env.get_template(relative_path)
                 rendered_template = template.render(
                     author = ctx.project_author,
