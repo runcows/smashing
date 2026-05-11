@@ -14,9 +14,13 @@ TEMPLATES = resources.files("src") / "mod_files"
 COMMIT_MESSAGE = os.getenv("COMMIT_MSG")
 GH_TOKEN = os.getenv("GH_TOKEN")
 REPO_LOCATION = "runcows/smashing"
-SMITHED_AUTH = os.getenv("SMITHED_AUTH_KEY")
 
+SMITHED_AUTH = os.getenv("SMITHED_AUTH_KEY")
 SMITHED_API = "https://api.smithed.dev/v2"
+
+MODRINTH_AUTH = os.getenv("MODRINTH_AUTH_KEY")
+MODRINTH_API = "https://api.modrinth.com/v2"
+MODRINTH_PROJECT_ID = "h3NiCjT1"
 
 
 def clear(ctx: Context):
@@ -77,6 +81,8 @@ def publish(ctx: Context, zip_name: str, jar_name: str):
     # github release
     if not SMITHED_AUTH:
         raise ValueError("NO SMITHED AUTH KEY")
+    if not MODRINTH_AUTH:
+        raise ValueError("No MODRINTH AUTH KEY")
     g = Github(GH_TOKEN)
     repo = g.get_repo(REPO_LOCATION)
     release = repo.create_git_release(
@@ -96,15 +102,14 @@ def publish(ctx: Context, zip_name: str, jar_name: str):
     # Smithed
     res = requests.get(f"{SMITHED_API}/packs/{ctx.project_id}")
     if not (200 <= res.status_code < 300):
-        print(f"Failed to get project... {res.status_code} {res.text}")
-        return
+        raise RuntimeError(f"SMITHED: Failed to get project... {res.status_code} {res.text}")
     project_json = res.json()
     project_versions = project_json["versions"]
     project_display = project_json["display"]
     current_icon = f"https://raw.githubusercontent.com/{REPO_LOCATION}/main/pack.png"
     current_readme = f"https://raw.githubusercontent.com/{REPO_LOCATION}/main/README.md"
     if project_display["icon"] != current_icon or project_display["webPage"] != current_readme:
-        print("updating project readme and icon")
+        print("SMITHED: Updating project readme and icon")
         res = requests.patch(
             f"{SMITHED_API}/packs/{ctx.project_id}",
             params = {'token': SMITHED_AUTH},
@@ -118,10 +123,10 @@ def publish(ctx: Context, zip_name: str, jar_name: str):
             }
         )
         if not (200 <= res.status_code < 300):
-            print(f"Failed to update project description... {res.status_code} {res.text}")
+            print(f"SMITHED: Failed to update project readme and icon... {res.status_code} {res.text}")
     matching_version = next((v for v in project_versions if v["name"] == ctx.project_version), None)
     if matching_version is not None:
-        raise ValueError("Version exists already.")
+        raise ValueError("SMITHED: Version exists already.")
     res = requests.post(
         f"{SMITHED_API}/packs/{ctx.project_id}/versions",
         params = {'token': SMITHED_AUTH, 'version': ctx.project_version},
@@ -138,5 +143,86 @@ def publish(ctx: Context, zip_name: str, jar_name: str):
         }
     )
     if not (200 <= res.status_code < 300):
-        raise ValueError(f"Failed to publish... {res.status_code} {res.text}")
-    print(res.text)
+        raise ValueError(f"SMITHED: Failed to publish... {res.status_code} {res.text}")
+    print(f"SMITHED: {res.text}")
+    
+    # Modrinth
+    USER_AGENT = "Smashing Github Actions"
+    res = requests.get(
+        f"{MODRINTH_API}/project/{MODRINTH_PROJECT_ID}",
+        headers = {'Authorization': MODRINTH_AUTH, 'User-Agent': USER_AGENT}
+    )
+    if not (200 <= res.status_code < 300):
+        raise RuntimeError(f"MODRINTH: Failed to get project... {res.status_code} {res.text}")
+    if res.json()["body"] != current_readme:
+        print("MODRINTH: Updating Project Description")
+        res = requests.patch(
+            f"{MODRINTH_API}/projects/{MODRINTH_PROJECT_ID}",
+            headers = {'Authorization': MODRINTH_AUTH, 'User-Agent': USER_AGENT},
+            json = {
+                "body": current_readme
+            }
+        )
+        if not (200 <= res.status_code < 300):
+            print(f"MODRINTH: Failed to update project description... {res.status_code} {res.text}")
+    res = requests.get(
+        f"{MODRINTH_API}/project/{MODRINTH_PROJECT_ID}/version",
+        headers = {'Authorization': MODRINTH_AUTH, 'User-Agent': USER_AGENT}
+    )
+    if not (200 <= res.status_code < 300):
+        raise RuntimeError(f"MODRINTH: Failed to get project versions... {res.status_code} {res.text}")
+    project_json = res.json()
+    matching_version = next((v for v in project_json if v["version_number"] == ctx.project_version), None)
+    if matching_version is not None:
+        raise ValueError("MODRINTH: Version exists already.")
+    # - Post Zip
+    with open("out" / f"{zip_name}.zip") as zf:
+        zip_bytes = zf.read()
+    res = requests.post(
+        f"{MODRINTH_API}/version",
+        headers = {'Authorization': MODRINTH_AUTH, 'User-Agent': USER_AGENT},
+        files = {
+            "data": {
+                "name": f"{ctx.project_name} {ctx.project_version}",
+                "version_number": ctx.project_version,
+                "changelog": COMMIT_MESSAGE,
+                "dependencies": [],
+                "game_versions": ctx.meta["supported_versions"],
+                "version_type": "release",
+                "loaders": ["datapack"],
+                "featured": False,
+                "project_id": MODRINTH_PROJECT_ID,
+                "file_parts": [f"{zip_name}.zip"]
+            },
+            f"{zip_name}.zip": zip_bytes
+        }
+    )
+    if not (200 <= res.status_code < 300):
+        raise ValueError(f"MODRINTH: Failed to publish Zip... {res.status_code} {res.text}")
+    print(f"MODRINTH: Successfully Published Zip {res.json()["name"]}")
+    # - Post Jar
+    with open("out" / f"{jar_name}.zip") as jf:
+        jar_bytes = jf.read()
+    res = requests.post(
+        f"{MODRINTH_API}/version",
+        headers = {'Authorization': MODRINTH_AUTH, 'User-Agent': USER_AGENT},
+        files = {
+            "data": {
+                "name": f"{ctx.project_name} {ctx.project_version}",
+                "version_number": ctx.project_version,
+                "changelog": COMMIT_MESSAGE,
+                "dependencies": [],
+                "game_versions": ctx.meta["supported_versions"],
+                "version_type": "release",
+                "loaders": ["fabric","quilt","forge","neoforge"],
+                "featured": False,
+                "project_id": MODRINTH_PROJECT_ID,
+                "file_parts": [f"{jar_name}.jar"]
+            },
+            f"{jar_name}.zip": jar_bytes
+        }
+    )
+    if not (200 <= res.status_code < 300):
+        raise ValueError(f"MODRINTH: Failed to publish Jar... {res.status_code} {res.text}")
+    print(f"MODRINTH: Successfully Published Jar {res.json()["name"]}")
+    
