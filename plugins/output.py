@@ -114,7 +114,7 @@ def publish(ctx: Context, zip_name: str, jar_name: str):
             }
         )
         if not (200 <= res.status_code < 300):
-            print("failed to update project description")
+            print(f"Status {res.status_code}: failed to update project description")
     matching_version = next((v for v in project_versions if v["name"] == ctx.project_version), None)
     if matching_version is not None:
         raise ValueError("Version exists already.")
@@ -134,6 +134,6 @@ def publish(ctx: Context, zip_name: str, jar_name: str):
         }
     )
     if not (200 <= res.status_code < 300):
-        print("failed to publish")
+        print(f"Status {res.status_code}: failed to publish")
         return
     print(res.text)
