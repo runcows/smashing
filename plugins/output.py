@@ -6,18 +6,17 @@ from importlib import resources
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 import os
 from pathlib import Path
+import requests
 import shutil
 import zipfile
 
 TEMPLATES = resources.files("src") / "mod_files"
-env = Environment(
-    loader=FileSystemLoader(TEMPLATES),
-    autoescape=select_autoescape()
-)
 COMMIT_MESSAGE = os.getenv("COMMIT_MSG")
 GH_TOKEN = os.getenv("GH_TOKEN")
-g = Github(GH_TOKEN)
-repo = g.get_repo("runcows/smashing")
+REPO_LOCATION = "runcows/smashing"
+SMITHED_AUTH = os.getenv("SMITHED_AUTH_KEY")
+
+SMITHED_API = "https://api.smithed.dev/v2"
 
 
 def clear(ctx: Context):
@@ -42,9 +41,17 @@ def beet_default(ctx: Context):
     
     jar_name = mod_output(ctx, zip_name)
     
-    publish(ctx, zip_name, jar_name)
+    if GH_TOKEN:
+        publish(ctx, zip_name, jar_name)
+    else:
+        print("No github token. Not publishing.")
+
 
 def mod_output(ctx: Context, zip_name: str) -> str:
+    env = Environment(
+        loader=FileSystemLoader(TEMPLATES),
+        autoescape=select_autoescape()
+    )
     jar_name = f"{ctx.project_id}-{ctx.project_version}"
     shutil.copy(f"out/{zip_name}.zip", f"out/{jar_name}.jar")
     with zipfile.ZipFile(f"out/{jar_name}.jar", 'a') as jar:
@@ -64,9 +71,12 @@ def mod_output(ctx: Context, zip_name: str) -> str:
                 )
                 jar.writestr(relative_path, rendered_template)
     return jar_name
-                
+
+
 def publish(ctx: Context, zip_name: str, jar_name: str):
     # github release
+    g = Github(GH_TOKEN)
+    repo = g.get_repo(REPO_LOCATION)
     release = repo.create_git_release(
         tag=f"v{ctx.project_version}",
         name=f"v{ctx.project_version}",
@@ -75,5 +85,55 @@ def publish(ctx: Context, zip_name: str, jar_name: str):
         prerelease=False
     )
     release.upload_asset(path=f"out/{zip_name}.zip")
+    gh_release_download_link = ""
     for asset in release.get_assets():
-        print(asset.browser_download_url)
+        gh_release_download_link = asset.browser_download_url
+        break
+    print(f"Github Release Asset Link : {gh_release_download_link}")
+    
+    # Smithed
+    res = requests.get(f"{SMITHED_API}/packs/{ctx.project_id}")
+    if not (200 <= res.status_code < 300):
+        print("Failed to get project.")
+        return
+    project_json = res.json()
+    project_versions = project_json["versions"]
+    project_display = project_json["display"]
+    current_icon = f"https://raw.githubusercontent.com/{REPO_LOCATION}/main/pack.png"
+    current_readme = f"https://raw.githubusercontent.com/{REPO_LOCATION}/main/README.md"
+    if project_display["icon"] != current_icon or project_display["webPage"] != current_readme:
+        print("updating project readme and icon")
+        res = requests.patch(
+            f"{SMITHED_API}/packs/{ctx.project_id}",
+            params = {'token': SMITHED_AUTH},
+            json = {
+                "display": {
+                    "icon": current_icon,
+                    "webPage": current_readme
+                }
+            }
+        )
+        if not (200 <= res.status_code < 300):
+            print("failed to update project description")
+    matching_version = next((v for v in project_versions if v["name"] == ctx.project_version), None)
+    if matching_version is not None:
+        raise ValueError("Version exists already.")
+    res = requests.post(
+        f"{SMITHED_API}/packs/{ctx.project_id}/versions",
+        params = {'token': SMITHED_AUTH, 'version': ctx.project_version},
+        json = {
+            "data": {
+                "downloads": {
+                    "datapack": gh_release_download_link,
+                    "resourcepack": ""
+                },
+                "name": ctx.project_version,
+                "supports": ctx.minecraft_version,
+                "dependencies": []
+            }
+        }
+    )
+    if not (200 <= res.status_code < 300):
+        print("failed to publish")
+        return
+    print(res.text)
