@@ -27,8 +27,6 @@ jobs:
         uses: astral-sh/setup-uv@v7
       - name: Build Pack
         run: uv run beet build
-        env:
-          COMMIT_MSG: $COMMIT_MSG
       - name: Create Github Release
         env:
           GH_TOKEN: ${{ github.token }}
