@@ -13,6 +13,7 @@ import zipfile
 
 TEMPLATES = resources.files("src") / "mod_files"
 COMMIT_MESSAGE = os.getenv("COMMIT_MSG")
+COMMIT_SHA = os.getenv("GITHUB_SHA")
 GH_TOKEN = os.getenv("GH_TOKEN")
 REPO_LOCATION = "runcows/smashing"
 
@@ -86,12 +87,13 @@ def publish(ctx: Context, zip_name: str, jar_name: str):
         raise ValueError("No MODRINTH AUTH KEY")
     g = Github(GH_TOKEN)
     repo = g.get_repo(REPO_LOCATION)
-    release = repo.create_git_release(
+    release = repo.create_git_tag_and_release(
         tag=f"v{ctx.project_version}",
-        name=f"v{ctx.project_version}",
-        message=COMMIT_MESSAGE,
-        draft=False,
-        prerelease=False
+        tag_message=COMMIT_MESSAGE,
+        release_name=f"v{ctx.project_version}",
+        release_message=COMMIT_MESSAGE,
+        object=COMMIT_SHA,
+        type="commit"
     )
     release.upload_asset(path=f"out/{zip_name}.zip")
     gh_release_download_link = ""
