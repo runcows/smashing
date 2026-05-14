@@ -109,9 +109,7 @@ function ./tick:
     # arrow
     as @e[type=#minecraft:arrows,tag=rc_smashing.at_speed,predicate=rc_smashing:not_moving] if function ./check_origin function ./arrow/attempt_smash:
         scoreboard players set $valid_block rc_smashing.misc 0
-        check_block = ./arrow/check_block
-        at forceloaded_marker function check_block with entity @s inBlockState
-        function check_block:
+        at forceloaded_marker function ./arrow/check_block with entity @s inBlockState:
             $setblock ~ ~ ~ $(Name) strict
             store result score $valid_block rc_smashing.misc if block ~ ~ ~ #rc_smashing:arrow_smashable
             setblock ~ ~ ~ air strict
@@ -122,9 +120,7 @@ function ./tick:
     # trident
     as @e[tag=rc_smashing.at_speed,predicate=rc_smashing:not_moving,type=trident] if function ./check_origin function ./trident/attempt_smash:
         scoreboard players set $valid_block rc_smashing.misc 0
-        check_block = ./trident/check_block
-        at forceloaded_marker function check_block with entity @s inBlockState
-        function check_block:
+        at forceloaded_marker function ./trident/check_block with entity @s inBlockState:
             $setblock ~ ~ ~ $(Name) strict
             store result score $valid_block rc_smashing.misc if block ~ ~ ~ #rc_smashing:trident_smashable
             setblock ~ ~ ~ air strict
