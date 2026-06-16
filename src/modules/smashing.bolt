@@ -1,0 +1,119 @@
+from typing import Any
+
+append function_tag minecraft:load {
+    "values": [
+        (./init)
+    ]
+}
+
+# function_tag minecraft:tick {
+#     "values": [
+#         (./tick)
+#     ]
+# }
+
+function_tag minecraft:tick {
+    "values": [
+        (./tick)
+    ]
+}
+
+predicate rc_smashing:not_moving {
+    "condition": "minecraft:entity_properties",
+    "entity": "this",
+    "predicate": {
+        "movement": {
+            "speed": 0
+        }
+    }
+}
+
+block_tag ./arrow_smashable {
+    "values": ctx.meta.smashing.arrow_smashable
+}
+
+function ./init:
+    scoreboard objectives add rc_smashing.misc dummy
+
+function ./tick:
+    # arrow smashing
+    as @e[tag=rc_smashing.arrow,predicate=rc_smashing:not_moving,predicate=summit.booth:rc_smashing/in_booth,type=arrow] function ./arrow/attempt_smash:
+        scoreboard players set $valid_block rc_smashing.misc 0
+        positioned -98.5 69.5 159.5 function ./arrow/check_block with entity @s inBlockState:
+            $setblock ~ ~ ~ $(Name) strict
+            store result score $valid_block rc_smashing.misc if block ~ ~ ~ #rc_smashing:arrow_smashable
+            setblock ~ ~ ~ bedrock strict
+
+        if score $valid_block rc_smashing.misc matches 0 return fail
+        at @s function ./smash_block with entity @s inBlockState:
+            $fill ~-0.07 ~-0.07 ~-0.07 ~0.07 ~0.07 ~0.07 air replace $(Name) destroy
+    # player logic
+
+
+function ./booth_enter:
+    give @s minecraft:crossbow[
+        charged_projectiles=[{
+            id:"minecraft:melon",
+            components:{intangible_projectile:{}}
+        }],
+        custom_data={id:"rc_smashing:crossbow"}
+    ]
+
+function ./booth_exit:
+    clear @s minecraft:crossbow[minecraft:custom_data~{id:"rc_smashing:crossbow"}]
+
+advancement ./shoot {
+    "criteria": {
+        "shoot_crossbow": {
+            "trigger": "minecraft:shot_crossbow",
+            "conditions": {
+                "item": {
+                    "predicates": {
+                        "minecraft:custom_data": {
+                            "id": "rc_smashing:crossbow"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "rewards": {
+        "function": (./shoot)
+    }
+}
+
+function ./shoot:
+    # This is sketch
+    item modify entity @s weapon.mainhand {
+        "function": "minecraft:filtered",
+        "item_filter": {
+            "predicates": {
+                "minecraft:custom_data": {
+                    "id": "rc_smashing:crossbow"
+                }
+            }
+        },
+        "on_pass": {
+            "function": "minecraft:set_components",
+            "components": {
+                "minecraft:charged_projectiles": [
+                    {
+                        "id": "minecraft:melon",
+                        "components":{
+                            "minecraft:intangible_projectile":{},
+                            "minecraft:custom_data":{
+                                "id": "rc_smashing:arrow"
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+    }
+    store success score $valid_shot rc_smashing.misc if entity @s[y_rotation=135..225,x_rotation=-20..40]
+    anchored eyes positioned ^ ^ ^ as @n[
+        nbt={item:{id:"minecraft:melon",components:{"minecraft:custom_data":{id:"rc_smashing:arrow"}}}},
+        type=arrow
+    ]:
+        if score $valid_shot rc_smashing.misc matches 0 return run kill @n[tag=rc_smashing.arrow,type=arrow]
+        tag @s add rc_smashing.arrow

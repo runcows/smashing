@@ -1,0 +1,20 @@
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+env:
+  COMMIT_MSG: ${{ github.event.head_commit.message }}
+  GH_TOKEN: ${{ github.token }}
+  SMITHED_AUTH_KEY: ${{ secrets.SMITHED_AUTH_KEY }}
+  MODRINTH_AUTH_KEY: ${{ secrets.MODRINTH_AUTH_KEY }}
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7
+      - name: Build Pack & Release
+        run: uv run beet build

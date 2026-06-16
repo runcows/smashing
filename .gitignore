@@ -1,1 +1,4 @@
 out/
+.venv/
+.beet_cache/
+**__pycache__/

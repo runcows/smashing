@@ -1,0 +1,40 @@
+{
+  "namespace": "rc_smashing",
+  "booth_name": "Smashing",
+  "bounding_boxes": {
+    "outer": {
+      "position": {
+        "x": {"min": -99, "max": -79},
+        "y": {"min": 67, "max": 79},
+        "z": {"min": 159, "max": 175}
+      },
+      "on_player_enter": "rc_smashing:outer_enter",
+      "on_player_exit": "rc_smashing:outer_exit"
+    }
+  },
+  "on_player_enter": "rc_smashing:booth_enter",
+  "on_player_exit": "rc_smashing:booth_exit",
+  "ticking_functions": {
+    "rc_smashing:tick": "1t"
+  },
+  "sticker_book": {
+    "background_color": "#e82734",
+    "region": "textured_tropics",
+    "stickers": [
+      {
+        "sticker_id": "attempt",
+        "sticker_texture": "rc_smashing:sticker/attempt",
+        "sticker_name": "Squishing",
+        "unobtained_text": "Attempt the Smashing Challenge",
+        "obtained_text": "Earned for attempting the Smashing Challenge"
+      },
+      {
+        "sticker_id": "beat",
+        "sticker_texture": "rc_smashing:sticker/beat",
+        "sticker_name": "Smashing",
+        "unobtained_text": "Complete the Smashing Challenge",
+        "obtained_text": "Earned for completing the Smashing Challenge"
+      }
+    ]
+  }
+}

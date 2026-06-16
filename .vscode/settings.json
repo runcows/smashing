@@ -1,0 +1,6 @@
+{
+    "workbench.iconTheme": "mc-dp-icons",
+    "files.associations": {
+        "*.bolt": "mcfunction"
+    }
+}
