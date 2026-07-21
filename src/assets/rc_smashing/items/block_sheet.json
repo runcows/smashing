@@ -1,0 +1,12 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "rc_smashing:block_sheet",
+    "tints":[
+      {
+        "type": "minecraft:constant",
+        "value": 66046
+      }
+    ]
+  }
+}

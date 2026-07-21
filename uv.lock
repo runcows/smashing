@@ -13,7 +13,7 @@ wheels = [
 
 [[package]]
 name = "beet"
-version = "0.115.0"
+version = "0.116.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
@@ -26,9 +26,9 @@ dependencies = [
     { name = "pyyaml" },
     { name = "toml" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/56/ad/798ffabe884dba56a7059bf899aff082efd964f5c3a27ca51c6bc71877f1/beet-0.115.0.tar.gz", hash = "sha256:9128aeb77f84389df01182c5f1e71ea861879391f114969589c48848e3f20512", size = 95694, upload-time = "2026-03-27T17:05:29.173Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/2a/0b/cf16e81838c3bc23dd4752bb11e874b6ade6692ed66be4cf07bde267b754/beet-0.116.0.tar.gz", hash = "sha256:11e680777f8f5f9a139c70e6f0b51067552bad36726e7dc64e3136a91b1edf5a", size = 95924, upload-time = "2026-06-26T20:53:55.979Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a8/f8/9f904662f6d992f24c7939e841225faecb4bd990ac65bca443e4d48d7f2a/beet-0.115.0-py3-none-any.whl", hash = "sha256:29c153ebc7a60bfc980b7f23aa6eb5e9aa579268691616d025ce2b8cd25d4b89", size = 125192, upload-time = "2026-03-27T17:05:27.875Z" },
+    { url = "https://files.pythonhosted.org/packages/6d/cf/80c118bec8247bd1d1d7270152f683a9e4edf49f7ef46ec92e9ce9799ada/beet-0.116.0-py3-none-any.whl", hash = "sha256:0955308e3768fe40119c70ba047b411485fef3164a6da77e6e8fb172d5cd23c7", size = 125348, upload-time = "2026-06-26T20:53:54.75Z" },
 ]
 
 [[package]]
@@ -135,15 +135,15 @@ wheels = [
 
 [[package]]
 name = "mecha"
-version = "0.103.0"
+version = "0.104.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "beet" },
     { name = "tokenstream" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/62/65/c0ac93886ec73499d90620e6b2931e90490ef6ed37e18a7400f6217dd017/mecha-0.103.0.tar.gz", hash = "sha256:37981668b3874547474ef2b31f28a11e7a3b4d02dc44000e423cde7649428b79", size = 581866, upload-time = "2026-03-27T17:06:01.04Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/69/b0/53c125f867afbd1e7531712e6a868e3fe8f77e781b2cd03859b346f4644a/mecha-0.104.0.tar.gz", hash = "sha256:ec9084df02d5b9634dbc23388ecdc4b79477751001b329dfed823d863138a24c", size = 630425, upload-time = "2026-06-26T20:54:31.159Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/3d/72/e0b3a63935e2b9c2b6664f540b37ff32774dd438fcafa623353d75badcbc/mecha-0.103.0-py3-none-any.whl", hash = "sha256:af3f8f94e9838ecacff091996f666efaac92cca35e631435d154b160e8817f96", size = 617085, upload-time = "2026-03-27T17:06:02.658Z" },
+    { url = "https://files.pythonhosted.org/packages/79/09/bfd3167ea7f16dad61c2a99ac2072422e34264efbc791ab76d92bd32a45f/mecha-0.104.0-py3-none-any.whl", hash = "sha256:3fe2c62523b0e7216375b5ac449139ee9ca7c7f67311c54682844c84c2cebaa8", size = 667819, upload-time = "2026-06-26T20:54:29.5Z" },
 ]
 
 [[package]]
@@ -325,11 +325,11 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "beet", specifier = ">=0.115.0" },
+    { name = "beet", specifier = ">=0.116.0" },
     { name = "bolt", specifier = ">=0.50.1" },
     { name = "bolt-native-macros", specifier = ">=0.5.1" },
     { name = "jinja2", specifier = ">=3.1.6" },
-    { name = "mecha", specifier = ">=0.103.0" },
+    { name = "mecha", specifier = ">=0.104.0" },
 ]
 
 [[package]]

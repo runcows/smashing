@@ -5,7 +5,7 @@ def beet_default(ctx: Context):
     pack.mcmeta.data["id"] = ctx.project_id
     
     pack.description = [
-      f"{ctx.project_name} v{ctx.project_version}",
+      f"{ctx.project_name} v{ctx.project_version}\n",
       {
         "text": ctx.project_author,
         "color": "#da3eb3"

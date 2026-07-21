@@ -1,24 +1,14 @@
 from typing import Any
 
-append function_tag minecraft:load {
-    "values": [
-        (./init)
-    ]
-}
+def append_f_tag(source: str, addition: str):
+    append function_tag (source) {
+        "values":[
+            (addition)
+        ]
+    }
 
-# function_tag minecraft:tick {
-#     "values": [
-#         (./tick)
-#     ]
-# }
-
-function_tag minecraft:tick {
-    "values": [
-        (./tick)
-    ]
-}
-
-predicate rc_smashing:not_moving {
+PRED_NOT_MOVING = ./not_moving
+predicate PRED_NOT_MOVING {
     "condition": "minecraft:entity_properties",
     "entity": "this",
     "predicate": {
@@ -32,59 +22,87 @@ block_tag ./arrow_smashable {
     "values": ctx.meta.smashing.arrow_smashable
 }
 
-function ./init:
-    scoreboard objectives add rc_smashing.misc dummy
 
-function ./tick:
-    # arrow smashing
-    as @e[tag=rc_smashing.arrow,predicate=rc_smashing:not_moving,predicate=summit.booth:rc_smashing/in_booth,type=arrow] function ./arrow/attempt_smash:
-        scoreboard players set $valid_block rc_smashing.misc 0
-        positioned -98.5 69.5 159.5 function ./arrow/check_block with entity @s inBlockState:
-            $setblock ~ ~ ~ $(Name) strict
-            store result score $valid_block rc_smashing.misc if block ~ ~ ~ #rc_smashing:arrow_smashable
-            setblock ~ ~ ~ bedrock strict
+LOC_CENTER = "-89 73 167"
+LOC_ACTIVITY = "-86.5 69.0 177.5"
+LOC_BEDROCK = "-98.5 79.5 159.5"
 
-        if score $valid_block rc_smashing.misc matches 0 return fail
-        at @s function ./smash_block with entity @s inBlockState:
-            $fill ~-0.07 ~-0.07 ~-0.07 ~0.07 ~0.07 ~0.07 air replace $(Name) destroy
-    # player logic
+PRED_IN_BOOTH = "summit.booth:rc_smashing/in_booth"
 
+TAG_ARROW = "rc_smashing.moving_arrow"
 
-function ./booth_enter:
-    give @s minecraft:crossbow[
-        charged_projectiles=[{
-            id:"minecraft:melon",
-            components:{intangible_projectile:{}}
-        }],
-        custom_data={id:"rc_smashing:crossbow"}
+TAG_ACTIVE_PLAYER = "summit.activity.active.rc_smashing.shoot_out"
+
+TAG_TARGET = "rc_smashing.shoot_out.target"
+TAG_ACTIVE_TARGET = "rc_smashing.shoot_out.active_target"
+TAG_TARGET_BLOCKED = "rc_smashing.shoot_out.blocked_target"
+
+TAG_DIFF_1 = "rc_smashing.shoot_out.target.difficulty_1"
+TAG_DIFF_2 = "rc_smashing.shoot_out.target.difficulty_2"
+TAG_DIFF_3 = "rc_smashing.shoot_out.target.difficulty_3"
+
+SCORE_MISC = "rc_smashing.misc"
+SCORE_TIME = "rc_smashing.timer"
+
+STORAGE_TEMP = "rc_smashing:temp"
+STORAGE_SCORES = "rc_smashing:crackshot"
+
+TIMER_DISPLAY = "b0974593-2566-4434-a3bc-72ce5e275400"
+NEW_PB_DISPLAY = "e97d5108-be9d-4b54-9dbd-5322d953c9b4"
+def update_time():
+    scoreboard players operation $seconds SCORE_TIME = $time SCORE_TIME
+    scoreboard players operation $seconds SCORE_TIME /= #20 SCORE_TIME
+    scoreboard players operation $minutes SCORE_TIME = $seconds SCORE_TIME
+    scoreboard players operation $minutes SCORE_TIME /= #60 SCORE_TIME
+    scoreboard players operation $seconds SCORE_TIME %= #60 SCORE_TIME
+    scoreboard players reset $sec_fill SCORE_TIME
+    # Decided im not going to do smaller units than seconds for display
+    if score $seconds SCORE_TIME matches ..9 run scoreboard players set $sec_fill SCORE_TIME 0
+    data modify entity TIMER_DISPLAY text set value [
+        {score:{name:"$minutes",objective:SCORE_TIME}},
+        ":",
+        {score:{name:"$sec_fill",objective:SCORE_TIME}},
+        {score:{name:"$seconds",objective:SCORE_TIME}}
     ]
 
-function ./booth_exit:
-    clear @s minecraft:crossbow[minecraft:custom_data~{id:"rc_smashing:crossbow"}]
+append_f_tag("minecraft:load", (./init))
+function ./init:
+    scoreboard objectives add SCORE_MISC dummy
+    scoreboard objectives add SCORE_TIME dummy
 
-advancement ./shoot {
-    "criteria": {
-        "shoot_crossbow": {
-            "trigger": "minecraft:shot_crossbow",
-            "conditions": {
-                "item": {
-                    "predicates": {
-                        "minecraft:custom_data": {
-                            "id": "rc_smashing:crossbow"
-                        }
-                    }
-                }
-            }
-        }
-    },
-    "rewards": {
-        "function": (./shoot)
+    scoreboard players set #2 SCORE_TIME 2
+    scoreboard players set #10 SCORE_TIME 10
+    scoreboard players set #20 SCORE_TIME 20
+    scoreboard players set #60 SCORE_TIME 60
+    scoreboard players set #INT_MAX SCORE_TIME 2147483647
+
+    bossbar add rc_smashing:shoot_out "Round 1"
+
+    positioned LOC_BEDROCK:
+        setblock ~ ~ ~ bedrock strict
+        setblock ~ ~-1 ~ decorated_pot strict
+
+    positioned LOC_CENTER function summit.activity:api/register {
+        booth_id: "rc_smashing", booth_name: "Smashing", booth_name_color: "#4aa82b",
+        activity_id: "shoot_out", activity_name: "Crackshot", activity_name_color: "#e82734",
+        player_count: 1, start_function: (./activity/start), abort_function: (./activity/abort)
     }
-}
 
-function ./shoot:
-    # This is sketch
-    item modify entity @s weapon.mainhand {
+function ./activity:
+    raw # this is a placeholder function to make bolt happy
+    START = ~/start
+    TICK = ~/tick
+    SHOOT = ~/shoot
+    END = ~/end
+    ABORT = ~/abort
+    RESET_PLAYER = ~/reset_player
+    ARENA_BLOCK = ~/arena_block
+    ARENA_CLEAR = ~/arena_clear
+
+    PRED_IN_ARENA = ~/in_arena
+
+    MODIFY_RELOAD = ~/reload
+    item_modifier MODIFY_RELOAD {
         "function": "minecraft:filtered",
         "item_filter": {
             "predicates": {
@@ -110,10 +128,388 @@ function ./shoot:
             }
         }
     }
-    store success score $valid_shot rc_smashing.misc if entity @s[y_rotation=135..225,x_rotation=-20..40]
-    anchored eyes positioned ^ ^ ^ as @n[
-        nbt={item:{id:"minecraft:melon",components:{"minecraft:custom_data":{id:"rc_smashing:arrow"}}}},
-        type=arrow
-    ]:
-        if score $valid_shot rc_smashing.misc matches 0 return run kill @n[tag=rc_smashing.arrow,type=arrow]
-        tag @s add rc_smashing.arrow
+
+    advancement SHOOT {
+        "criteria": {
+            "shoot_crossbow": {
+                "trigger": "minecraft:shot_crossbow",
+                "conditions": {
+                    "player": {
+                        "minecraft:entity_tags": {
+                            "all_of": [
+                                TAG_ACTIVE_PLAYER
+                            ]
+                        }
+                    },
+                    "item": {
+                        "predicates": {
+                            "minecraft:custom_data": {
+                                "id": "rc_smashing:crossbow"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "rewards": {
+            "function": SHOOT
+        }
+    }
+    function SHOOT:
+        advancement revoke @s only SHOOT
+
+        scoreboard players set $shoot_cooldown SCORE_MISC 5
+
+        store success score $valid_shot rc_smashing.misc if entity @s[y_rotation=120..260,x_rotation=-35..40]
+        anchored eyes positioned ^ ^ ^ as @n[
+            type=arrow,
+            distance=..1,
+            nbt={item:{id:"minecraft:melon",components:{"minecraft:custom_data":{id:"rc_smashing:arrow"}}}}
+        ]:
+            # for invalid shots, no poof as it would be in the players face
+            if score $valid_shot rc_smashing.misc matches 0 return run kill @s
+            tag @s add TAG_ARROW
+
+
+    function START:
+        schedule function TICK 1t
+
+        scoreboard players set $shoot_cooldown SCORE_MISC 0
+        scoreboard players set $round SCORE_MISC 0
+        scoreboard players set $new_best SCORE_MISC 0
+
+        scoreboard players set $time SCORE_TIME 0
+        scoreboard players set $between SCORE_TIME -1
+
+        data modify entity TIMER_DISPLAY text_opacity set value -1
+        data merge entity NEW_PB_DISPLAY {
+            text_opacity:0,
+            text:"",
+            transformation:{scale:[0.0f,0.0f,0.0f]}
+        }
+
+        bossbar set rc_smashing:shoot_out name "Round 1"
+        bossbar set rc_smashing:shoot_out style notched_10
+        bossbar set rc_smashing:shoot_out max 10
+        bossbar set rc_smashing:shoot_out color red
+
+        at @e[type=marker,tag=TAG_TARGET,predicate=PRED_IN_ARENA] run setblock ~ ~ ~ air strict
+        function ARENA_BLOCK
+        raw # get out of my arena >:(
+        tp @a[predicate=PRED_IN_ARENA,tag=!TAG_ACTIVE_PLAYER] -96.5 69.0 175.5
+
+        as @a[tag=TAG_ACTIVE_PLAYER,limit=1] positioned LOC_ACTIVITY:
+            tp @s ~ ~ ~
+            rotate @s 180 0
+
+            kill @e[type=item_display,tag=rc_smashing.sittable_display] 
+            summon item_display ~ ~0.7 ~ {Tags:["rc_smashing.sittable_display"]}
+            ride @s mount @e[type=item_display,tag=rc_smashing.sittable_display,distance=..1,limit=1]
+            
+            bossbar set rc_smashing:shoot_out players @s
+
+            # TODO: we need to inv cache here
+            
+            item replace entity @s weapon.mainhand with minecraft:crossbow[
+                charged_projectiles=[{
+                    id:"minecraft:melon",
+                    components:{intangible_projectile:{}}
+                }],
+                custom_data={id:"rc_smashing:crossbow"},
+                !damage
+            ]
+    
+    function TICK:
+        schedule function TICK 1t
+        scoreboard players add $time SCORE_TIME 1
+        update_time()
+        # arrow smashing
+        raw # I've perf tested this selector specifically for release Smashing and this is the best order
+        as @e[tag=TAG_ARROW,predicate=PRED_IN_ARENA,predicate=PRED_NOT_MOVING,type=arrow] function ~/attempt_smash:
+            scoreboard players set $valid_block SCORE_MISC 0
+            positioned LOC_BEDROCK function ./arrow/check_block with entity @s inBlockState:
+                $setblock ~ ~ ~ $(Name) strict
+                store result score $valid_block SCORE_MISC if block ~ ~ ~ #rc_smashing:arrow_smashable
+                setblock ~ ~ ~ bedrock strict
+
+            if score $valid_block SCORE_MISC matches 0 at @s return run function ~/fail:
+                kill @s
+                particle minecraft:item{item:{id:"minecraft:arrow"}} ~ ~ ~ 0.01 0.01 0.01 0.1 25 normal @a[distance=..20]
+                particle minecraft:small_gust ~ ~ ~ 0 0 0 1 1 normal @a[distance=..20]
+            at @s function ~/succeed with entity @s inBlockState:
+                $fill ~-0.07 ~-0.07 ~-0.07 ~0.07 ~0.07 ~0.07 air replace $(Name)
+                $particle minecraft:dust_pillar{block_state:{Name:"$(Name)"}} ~ ~ ~ 0.01 0.01 0.01 1 25 normal @a[distance=..20]
+                $particle minecraft:block{block_state:{Name:"$(Name)"}} ~ ~ ~ 0.25 0.25 0.25 1 75 normal @a[distance=..20]
+                kill @s
+                particle minecraft:item{item:{id:"minecraft:arrow"}} ~ ~ ~ 0.01 0.01 0.01 0.1 25 normal @a[distance=..20]
+                playsound minecraft:entity.arrow.hit_player player @a[tag=TAG_ACTIVE_PLAYER,limit=1] ~ ~ ~ 20 1
+        # player logic | reload
+        as @a[tag=TAG_ACTIVE_PLAYER,limit=1] at @s:
+            if predicate {condition:"minecraft:inverted",term:{condition:"minecraft:entity_properties",entity:"this",predicate:{"minecraft:vehicle":{}}}}:
+                ride @s mount @n[type=item_display,tag=rc_smashing.sittable_display]
+            if score $shoot_cooldown SCORE_MISC matches -1:
+                unless items entity @s weapon.* minecraft:crossbow[minecraft:custom_data~{id:"rc_smashing:crossbow"}] run return fail
+                
+                item modify entity @s weapon.mainhand MODIFY_RELOAD
+                item modify entity @s weapon.offhand MODIFY_RELOAD
+                
+                playsound minecraft:item.crossbow.loading_end player @a[distance=..10] ~ ~ ~ 100
+                scoreboard players set $shoot_cooldown SCORE_MISC -2
+            if score $shoot_cooldown SCORE_MISC matches 0.. run scoreboard players remove $shoot_cooldown SCORE_MISC 1
+        # round logic
+        if score $between SCORE_TIME matches -1:
+            # round is active
+            tag @e[type=marker,tag=TAG_TARGET_BLOCKED,predicate=PRED_IN_ARENA] remove TAG_TARGET_BLOCKED
+            as @e[type=marker,tag=TAG_ACTIVE_TARGET,predicate=PRED_IN_ARENA] at @s unless block ~ ~ ~ air run tag @s add TAG_TARGET_BLOCKED
+            store result bossbar rc_smashing:shoot_out value if entity @e[type=marker,tag=TAG_TARGET_BLOCKED,predicate=PRED_IN_ARENA]
+            
+            at @e[type=marker,tag=TAG_ACTIVE_TARGET,predicate=PRED_IN_ARENA] unless block ~ ~ ~ air run return fail
+            # round should end, all blocks broken
+            tag @e[type=marker,tag=TAG_ACTIVE_TARGET,predicate=PRED_IN_ARENA] remove TAG_ACTIVE_TARGET
+            scoreboard players add $round SCORE_MISC 1
+            scoreboard players set $between SCORE_TIME 20
+            # start new round | choose the markers
+            if score $round SCORE_MISC matches 1 run return:
+                tag @e[type=marker,tag=TAG_TARGET,tag=TAG_DIFF_1,sort=random,limit=10,predicate=PRED_IN_ARENA] add TAG_ACTIVE_TARGET
+            as @a[tag=TAG_ACTIVE_PLAYER,limit=1] at @s run playsound minecraft:block.note_block.bell player @s ~ ~ ~ 100 1
+            if score $round SCORE_MISC matches 2 run return:
+                bossbar set rc_smashing:shoot_out name "Round 2"
+                tag @e[type=marker,tag=TAG_TARGET,tag=TAG_DIFF_1,sort=random,limit=7,predicate=PRED_IN_ARENA] add TAG_ACTIVE_TARGET
+                tag @e[type=marker,tag=TAG_TARGET,tag=TAG_DIFF_2,sort=random,limit=3,predicate=PRED_IN_ARENA] add TAG_ACTIVE_TARGET
+            if score $round SCORE_MISC matches 3 run return:
+                bossbar set rc_smashing:shoot_out name "Round 3"
+                tag @e[type=marker,tag=TAG_TARGET,tag=TAG_DIFF_1,sort=random,limit=6,predicate=PRED_IN_ARENA] add TAG_ACTIVE_TARGET
+                tag @e[type=marker,tag=TAG_TARGET,tag=TAG_DIFF_2,sort=random,limit=3,predicate=PRED_IN_ARENA] add TAG_ACTIVE_TARGET
+                tag @e[type=marker,tag=TAG_TARGET,tag=TAG_DIFF_3,sort=random,limit=1,predicate=PRED_IN_ARENA] add TAG_ACTIVE_TARGET
+            if score $round SCORE_MISC matches 4 run return:
+                bossbar set rc_smashing:shoot_out name "Round 4"
+                bossbar set rc_smashing:shoot_out style notched_12
+                bossbar set rc_smashing:shoot_out max 12
+                tag @e[type=marker,tag=TAG_TARGET,tag=TAG_DIFF_1,sort=random,limit=6,predicate=PRED_IN_ARENA] add TAG_ACTIVE_TARGET
+                tag @e[type=marker,tag=TAG_TARGET,tag=TAG_DIFF_2,sort=random,limit=4,predicate=PRED_IN_ARENA] add TAG_ACTIVE_TARGET
+                tag @e[type=marker,tag=TAG_TARGET,tag=TAG_DIFF_3,sort=random,limit=2,predicate=PRED_IN_ARENA] add TAG_ACTIVE_TARGET
+            if score $round SCORE_MISC matches 5 run return:
+                bossbar set rc_smashing:shoot_out name "Round 5"
+                tag @e[type=marker,tag=TAG_TARGET,tag=TAG_DIFF_1,sort=random,limit=4,predicate=PRED_IN_ARENA] add TAG_ACTIVE_TARGET
+                tag @e[type=marker,tag=TAG_TARGET,tag=TAG_DIFF_2,sort=random,limit=5,predicate=PRED_IN_ARENA] add TAG_ACTIVE_TARGET
+                tag @e[type=marker,tag=TAG_TARGET,tag=TAG_DIFF_3,sort=random,limit=3,predicate=PRED_IN_ARENA] add TAG_ACTIVE_TARGET
+            if score $round SCORE_MISC matches 6 run function END
+        if score $between SCORE_TIME matches 0:
+            scoreboard players set $between SCORE_TIME -1
+            as @e[type=marker,tag=TAG_TARGET,tag=TAG_ACTIVE_TARGET,predicate=PRED_IN_ARENA] at @s:
+                if entity @s[tag=!TAG_DIFF_3] store result score $rand SCORE_MISC run random value 1..5
+                if entity @s[tag=TAG_DIFF_3] store result score $rand SCORE_MISC run random value 1..4
+                if score $rand SCORE_MISC matches 1..2 run return run setblock ~ ~ ~ minecraft:melon strict
+                if score $rand SCORE_MISC matches 3..4 run return run setblock ~ ~ ~ minecraft:pumpkin strict
+                if score $rand SCORE_MISC matches 5 run return run setblock ~ ~ ~ minecraft:decorated_pot strict
+        if score $between SCORE_TIME matches 1..:
+            scoreboard players remove $between SCORE_TIME 1
+            at @e[type=marker,tag=TAG_TARGET,tag=TAG_ACTIVE_TARGET,predicate=PRED_IN_ARENA] run particle wax_off ~ ~ ~ 0.1 0.1 0.1 1 3 normal @a[distance=..20]
+    
+    function END:
+        schedule clear TICK
+        as @a[tag=TAG_ACTIVE_PLAYER,limit=1]:
+            bossbar set rc_smashing:shoot_out players @a[tag=rc_smashing.no_one,limit=1]
+            advancement grant @s only summit.sticker_book:rc_smashing/participate
+            unless score @s SCORE_TIME <= $time SCORE_TIME positioned LOC_BEDROCK:
+                # new PB
+                scoreboard players operation @s SCORE_TIME = $time SCORE_TIME
+
+                scoreboard players operation @s rc_smashing.leaderboard = #INT_MAX SCORE_TIME
+                scoreboard players operation @s rc_smashing.leaderboard -= @s SCORE_TIME
+
+                data remove storage STORAGE_TEMP player
+                store result storage STORAGE_TEMP player.score int 1 run scoreboard players get @s rc_smashing.leaderboard
+                # store result storage STORAGE_TEMP player.time int 1 run scoreboard players get $time SCORE_TIME
+                store result storage STORAGE_TEMP player.seconds int 1 run scoreboard players get $seconds SCORE_TIME
+                store result storage STORAGE_TEMP player.minutes int 1 run scoreboard players get $minutes SCORE_TIME
+
+                loot replace block ~ ~-1 ~ contents loot summit:technical/player_head
+                data modify storage STORAGE_TEMP player.name set from block ~ ~-1 ~ item.components."minecraft:profile".name
+
+                with storage STORAGE_TEMP player:
+                    data modify storage STORAGE_TEMP player.display set value ["",{text:f"{$(name)}"},{text:" - ",color:"gray"},{text:f"{$(minutes)}:{$(seconds)}"}]
+                
+                data merge entity NEW_PB_DISPLAY {
+                    text_opacity:-1,
+                    text:{color:"gold",text:"New Personal\nBest",bold:true},
+                    transformation:{scale:[1.5f,1.5f,1.5f]}
+                }
+                scoreboard players set $new_best SCORE_MISC 1
+                
+                function rc_smashing:leaderboard/add_score with storage STORAGE_TEMP player
+
+        scoreboard players set $between SCORE_TIME 80
+        DELAY = ~/delay
+        schedule function DELAY 1t
+        function DELAY:
+            scoreboard players remove $between SCORE_TIME 1
+            bossbar set rc_smashing:shoot_out players @a[tag=rc_smashing.no_one,limit=1]
+            if score $between SCORE_TIME matches 0 run return:
+                # end frfr
+                data modify entity TIMER_DISPLAY text_opacity set value 0
+                data merge entity NEW_PB_DISPLAY {
+                    text_opacity:0,
+                    text:"",
+                    transformation:{scale:[0.0f,0.0f,0.0f]}
+                }
+                as @a[tag=TAG_ACTIVE_PLAYER,limit=1]:
+                    ride @s dismount
+                    clear @s minecraft:crossbow[minecraft:custom_data~{id:"rc_smashing:crossbow"}]
+                kill @e[type=item_display,tag=rc_smashing.sittable_display]
+                at @e[type=marker,tag=TAG_TARGET,predicate=PRED_IN_ARENA] run setblock ~ ~ ~ air strict
+                function ARENA_CLEAR
+                function summit.activity:api/end_activity {booth_id:"rc_smashing",activity_id:"shoot_out"}
+            
+            # continue delay
+            schedule function DELAY 1t
+            scoreboard players operation $visible SCORE_TIME = $between SCORE_TIME
+            scoreboard players operation $visible SCORE_TIME /= #10 SCORE_TIME
+            scoreboard players operation $visible SCORE_TIME %= #2 SCORE_TIME
+            if score $visible SCORE_TIME matches 0:
+                data modify entity TIMER_DISPLAY text_opacity set value 0
+                if score $new_best SCORE_MISC matches 1 run data modify entity NEW_PB_DISPLAY transformation.scale set value [1.75f,1.75f,1.75f]
+            if score $visible SCORE_TIME matches 1:
+                data modify entity TIMER_DISPLAY text_opacity set value -1
+                if score $new_best SCORE_MISC matches 1 run data modify entity NEW_PB_DISPLAY transformation.scale set value [1.5f,1.5f,1.5f]
+            # sound jingle
+            if score $new_best SCORE_MISC matches 1 if score $between SCORE_TIME matches 72.. at @a[tag=TAG_ACTIVE_PLAYER,limit=1]:
+                playsound minecraft:block.note_block.snare player @a[distance=..16] ~ ~ ~ 70 0.707107
+            if score $between SCORE_TIME matches 70 at @a[tag=TAG_ACTIVE_PLAYER,limit=1]:
+                # A
+                playsound minecraft:block.note_block.trumpet player @a[distance=..16] ~ ~ ~ 70 1.189207
+                if score $new_best SCORE_MISC matches 1 run playsound minecraft:block.note_block.snare player @a[distance=..16] ~ ~ ~ 70 0.707107
+            if score $between SCORE_TIME matches 62 at @a[tag=TAG_ACTIVE_PLAYER,limit=1]:
+                # F
+                playsound minecraft:block.note_block.trumpet player @a[distance=..16] ~ ~ ~ 70 0.943874
+                if score $new_best SCORE_MISC matches 1 run playsound minecraft:block.note_block.snare player @a[distance=..16] ~ ~ ~ 70 0.707107
+            if score $between SCORE_TIME matches 58 at @a[tag=TAG_ACTIVE_PLAYER,limit=1]:
+                # F
+                playsound minecraft:block.note_block.trumpet player @a[distance=..16] ~ ~ ~ 70 0.943874
+                if score $new_best SCORE_MISC matches 1 run playsound minecraft:block.note_block.snare player @a[distance=..16] ~ ~ ~ 70 0.707107
+            if score $between SCORE_TIME matches 54 at @a[tag=TAG_ACTIVE_PLAYER,limit=1]:
+                # C
+                playsound minecraft:block.note_block.trumpet player @a[distance=..16] ~ ~ ~ 70 1.414214
+                if score $new_best SCORE_MISC matches 1 run playsound minecraft:block.note_block.snare player @a[distance=..16] ~ ~ ~ 70 0.707107
+    
+    function ABORT:
+        schedule clear TICK
+        at @e[type=marker,tag=TAG_TARGET,predicate=PRED_IN_ARENA] run setblock ~ ~ ~ air strict
+        tag @e[type=marker,tag=TAG_ACTIVE_TARGET,predicate=PRED_IN_ARENA] remove TAG_ACTIVE_TARGET
+        kill @e[type=item_display,tag=rc_smashing.sittable_display]
+        data modify entity TIMER_DISPLAY text set value ""
+        data modify entity TIMER_DISPLAY text_opacity set value 0
+        data merge entity NEW_PB_DISPLAY {
+            text_opacity:0,
+            text:"",
+            transformation:{scale:[0.0f,0.0f,0.0f]}
+        }
+        function ARENA_CLEAR
+    
+    append_f_tag("summit:reset_player", RESET_PLAYER)
+    function RESET_PLAYER:
+        bossbar set rc_smashing:shoot_out players @a[tag=TAG_ACTIVE_PLAYER,limit=1]
+
+    runcows_mannequin = "fca8b17f-0639-4d24-9bf1-bbdae9ab1954"
+    jesse_mannequin = "ed43d78e-0865-4d9c-9434-c70d59d04c8a"
+    function ARENA_BLOCK:
+        raw # barrier bars
+        fill -92 71 177 -90 69 177 minecraft:oxidized_copper_bars[east=true,west=true] replace air strict
+        fill -88 71 178 -86 69 178 minecraft:oxidized_copper_bars[east=true,west=true] replace air strict
+        fill -85 69 177 -85 71 177 minecraft:oxidized_copper_bars[north=true,south=true] replace air strict
+        fill -83 69 174 -83 74 174 minecraft:oxidized_copper_bars[north=true,south=true] replace air strict
+        fill -89 69 177 -89 71 177 minecraft:oxidized_copper_bars[south=true,west=true] replace air strict
+        fill -89 69 178 -89 71 178 minecraft:oxidized_copper_bars[north=true,east=true] replace air strict
+        fill -85 69 178 -85 71 178 minecraft:oxidized_copper_bars[north=true,west=true] replace air strict
+        fill -84 69 176 -84 73 176 minecraft:oxidized_copper_bars[north=true,west=true] replace air strict
+        fill -83 69 175 -83 74 175 minecraft:oxidized_copper_bars[north=true,west=true] replace air strict
+        fill -85 69 176 -85 71 176 minecraft:oxidized_copper_bars[south=true,east=true] replace air strict
+        fill -84 69 175 -84 74 175 minecraft:oxidized_copper_bars[south=true,east=true] replace air strict
+        fill -83 70 173 -83 73 173 minecraft:oxidized_copper_bars[south=true,east=true] replace air strict
+
+        raw # barrier blocks
+        fill -90 78 173 -83 78 166 barrier replace air strict
+        fill -91 77 169 -91 77 174 barrier replace air strict
+        fill -91 76 169 -91 75 175 barrier replace air strict
+        fill -91 74 169 -91 73 176 barrier replace air strict
+        fill -90 77 174 -83 77 174 barrier replace air strict
+        fill -90 76 175 -83 75 175 barrier replace air strict
+        fill -90 74 176 -84 73 176 barrier replace air strict
+        fill -92 72 177 -85 72 177 barrier replace air strict
+        fill -85 72 176 -85 72 176 barrier replace air strict
+        fill -85 72 178 -89 72 178 barrier replace air strict
+        fill -92 72 176 -92 72 169 barrier replace air strict
+        fill -82 70 172 -82 74 171 barrier replace air strict
+        fill -83 74 173 -83 77 173 barrier replace air strict
+        fill -83 75 174 -83 76 174 barrier replace air strict
+
+        raw # remove default blocks
+        setblock -86 73 171 air strict
+        setblock -90 69 167 air strict
+        setblock -84 70 159 air strict
+        setblock -89 72 159 air strict
+        fill -94 69 161 -93 70 161 air strict
+        setblock -95 69 161 air strict
+        setblock -93 69 162 air strict
+        setblock -92 69 161 air strict
+        setblock -94 69 162 air strict
+        setblock -93 71 160 air strict
+        setblock -90 70 159 air strict
+        setblock -87 72 159 air strict
+        setblock -86 72 159 air strict
+        setblock -86 70 159 air strict
+
+        raw # move mannequins
+        raw f"tp {jesse_mannequin} {LOC_BEDROCK}"
+        raw f"tp {runcows_mannequin} {LOC_BEDROCK}"
+    
+    function ARENA_CLEAR:
+        raw # barrier bars
+        fill -92 71 177 -90 69 177 air replace minecraft:oxidized_copper_bars strict
+        fill -88 71 178 -86 69 178 air replace minecraft:oxidized_copper_bars strict
+        fill -85 69 177 -85 71 177 air replace minecraft:oxidized_copper_bars strict
+        fill -83 69 174 -83 74 174 air replace minecraft:oxidized_copper_bars strict
+        fill -89 69 177 -89 71 177 air replace minecraft:oxidized_copper_bars strict
+        fill -89 69 178 -89 71 178 air replace minecraft:oxidized_copper_bars strict
+        fill -85 69 178 -85 71 178 air replace minecraft:oxidized_copper_bars strict
+        fill -84 69 176 -84 73 176 air replace minecraft:oxidized_copper_bars strict
+        fill -83 69 175 -83 74 175 air replace minecraft:oxidized_copper_bars strict
+        fill -85 69 176 -85 71 176 air replace minecraft:oxidized_copper_bars strict
+        fill -84 69 175 -84 74 175 air replace minecraft:oxidized_copper_bars strict
+        fill -83 70 173 -83 73 173 air replace minecraft:oxidized_copper_bars strict
+
+        raw # barrier blocks
+        fill -90 78 173 -83 78 166 air replace barrier strict
+        fill -91 77 169 -91 77 174 air replace barrier strict
+        fill -91 76 169 -91 75 175 air replace barrier strict
+        fill -91 74 169 -91 73 176 air replace barrier strict
+        fill -90 77 174 -83 77 174 air replace barrier strict
+        fill -90 76 175 -83 75 175 air replace barrier strict
+        fill -90 74 176 -84 73 176 air replace barrier strict
+        fill -92 72 177 -85 72 177 air replace barrier strict
+        fill -85 72 176 -85 72 176 air replace barrier strict
+        fill -85 72 178 -89 72 178 air replace barrier strict
+        fill -92 72 176 -92 72 169 air replace barrier strict
+        fill -82 70 172 -82 74 171 air replace barrier strict
+        fill -83 74 173 -83 77 173 air replace barrier strict
+        fill -83 75 174 -83 76 174 air replace barrier strict
+
+        raw # default blocks
+        setblock -86 73 171 minecraft:melon strict
+        setblock -90 69 167 minecraft:decorated_pot strict
+        setblock -84 70 159 minecraft:decorated_pot strict
+        setblock -89 72 159 minecraft:decorated_pot strict
+        fill -94 69 161 -93 70 161 minecraft:barrel[facing=south] strict
+        setblock -95 69 161 minecraft:barrel[facing=south] strict
+        setblock -93 69 162 minecraft:barrel[facing=up] strict
+        setblock -92 69 161 minecraft:barrel[facing=up] strict
+        setblock -94 69 162 minecraft:chest[facing=south] strict
+        setblock -93 71 160 minecraft:chest[facing=east] strict
+        setblock -90 70 159 minecraft:orange_candle[candles=1,lit=true] strict
+        setblock -87 72 159 minecraft:sea_pickle[pickles=1,waterlogged=false] strict
+        setblock -86 72 159 minecraft:purple_candle[candles=3,lit=true] strict
+        setblock -86 70 159 minecraft:blue_candle[candles=2] strict
+
+        raw # move mannequins to display location
+        tp jesse_mannequin -84.5625 71.9375 159.625
+        tp runcows_mannequin -86.71152420371898 70.0 159.75

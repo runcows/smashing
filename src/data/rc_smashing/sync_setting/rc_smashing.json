@@ -1,0 +1,10 @@
+{
+  "scores": ["rc_smashing.leaderboard","rc_smashing.timer"],
+  "databases": [
+    {
+      "key": "rc_smashing:leaderboard",
+      "on_sync": "rc_smashing:leaderboard/on_sync",
+      "on_initialize": "rc_smashing:leaderboard/load"
+    }
+  ]
+}

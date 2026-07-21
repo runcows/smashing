@@ -4,37 +4,37 @@
   "bounding_boxes": {
     "outer": {
       "position": {
-        "x": {"min": -99, "max": -79},
-        "y": {"min": 67, "max": 79},
-        "z": {"min": 159, "max": 175}
-      },
-      "on_player_enter": "rc_smashing:outer_enter",
-      "on_player_exit": "rc_smashing:outer_exit"
+        "x": {"min": -100.5, "max": -76.0},
+        "y": {"min": 67.0, "max": 72.5},
+        "z": {"min": 159.0, "max": 178.5}
+      }
     }
-  },
-  "on_player_enter": "rc_smashing:booth_enter",
-  "on_player_exit": "rc_smashing:booth_exit",
-  "ticking_functions": {
-    "rc_smashing:tick": "1t"
   },
   "sticker_book": {
     "background_color": "#e82734",
     "region": "textured_tropics",
     "stickers": [
       {
-        "sticker_id": "attempt",
-        "sticker_texture": "rc_smashing:sticker/attempt",
-        "sticker_name": "Squishing",
-        "unobtained_text": "Attempt the Smashing Challenge",
-        "obtained_text": "Earned for attempting the Smashing Challenge"
+        "sticker_id": "participate",
+        "sticker_texture": "rc_smashing:sticker/participate",
+        "sticker_name": "Smashing",
+        "unobtained_text": "Play a game of Smashing Crackshot",
+        "obtained_text": "Earned for playing a game of Smashing Crackshot"
       },
       {
-        "sticker_id": "beat",
-        "sticker_texture": "rc_smashing:sticker/beat",
-        "sticker_name": "Smashing",
-        "unobtained_text": "Complete the Smashing Challenge",
-        "obtained_text": "Earned for completing the Smashing Challenge"
+        "sticker_id": "top_10",
+        "sticker_texture": "rc_smashing:sticker/top_10",
+        "sticker_name": "Shattering",
+        "unobtained_text": "Earn a Top 10 Score in Smashing Crackshot",
+        "obtained_text": "Earned for getting a Top 10 Score in Smashing Crackshot"
       }
     ]
-  }
+  },
+  "balloons":[
+    {
+      "balloon_id": "smashing",
+      "balloon_name": "Smashing Balloon",
+      "balloon_model": "rc_smashing:balloon"
+    }
+  ]
 }

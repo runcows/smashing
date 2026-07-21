@@ -1,0 +1,169 @@
+
+NUM_SLOTS = 10
+
+function rc_smashing:leaderboard:
+    PROCESS = ~/process
+    CHECK_SCORES = ~/check_scores
+    UPDATE_DISPLAY = ~/update_display
+
+    function ~/load:
+        scoreboard objectives add rc_smashing.leaderboard dummy
+        data modify storage rc_smashing:leaderboard index set value 0
+        data modify storage rc_smashing:leaderboard processing set value 1b
+        data modify storage rc_smashing:leaderboard highscores set value {values:[], lowest: -1}
+
+        function PROCESS
+        schedule function UPDATE_DISPLAY 10s
+
+    function PROCESS:
+        scoreboard players set #count rc_smashing.leaderboard 0
+        
+        raw # setup counters
+        store result score #i rc_smashing.leaderboard data get storage rc_smashing:leaderboard index
+        store result score #len rc_smashing.leaderboard data get storage rc_smashing:leaderboard keys
+        store result score #highscores_len rc_smashing.leaderboard data get storage rc_smashing:leaderboard highscores.values
+        store result score #lowest rc_smashing.leaderboard data get storage rc_smashing:leaderboard highscores.lowest
+
+        raw # if we're at the end, mark processing as done
+        if score #i rc_smashing.leaderboard = #len rc_smashing.leaderboard return:
+            data modify storage rc_smashing:leaderboard processing set value 0b       
+
+        execute function ~/iter with storage rc_smashing:leaderboard {}:
+            $data modify storage rc_smashing:temp key set from storage rc_smashing:leaderboard keys[$(index)]
+
+            execute function ~/get_player with storage rc_smashing:temp key:
+                $data modify storage rc_smashing:temp player set from storage rc_smashing:leaderboard database."$(uuid)"
+                data modify storage rc_smashing:temp player.uuid set value f"{$(uuid)}"
+
+            store result score #score rc_smashing.leaderboard data get storage rc_smashing:temp player.score
+
+            raw # If we are at capacity, only check the player if their score is greater than the lowest score in the list 
+            if score #highscores_len rc_smashing.leaderboard matches (NUM_SLOTS,None) if score #score rc_smashing.leaderboard >= #lowest rc_smashing.leaderboard function CHECK_SCORES with storage rc_smashing:temp player
+            raw # If we have less than the max, check the score regardless
+            if score #highscores_len rc_smashing.leaderboard matches (None,NUM_SLOTS-1) function CHECK_SCORES with storage rc_smashing:temp player
+
+            raw # Increase the count and index
+            scoreboard players add #count rc_smashing.leaderboard 1
+            store result storage rc_smashing:leaderboard index int 1 scoreboard players add #i rc_smashing.leaderboard 1
+            
+            raw # Only do 50 entries per tick to avoid holding the tick for too long
+            if score #count rc_smashing.leaderboard matches 50.. return:
+                schedule function PROCESS 1t
+
+            if score #i rc_smashing.leaderboard < #len rc_smashing.leaderboard return run function ~/ with storage rc_smashing:leaderboard {}
+            raw # Mark as being done
+            data modify storage rc_smashing:leaderboard processing set value 0b
+
+    function CHECK_SCORES:
+        # with $score : int
+        # with $uuid : str
+        raw # hi is the index in highscores.values
+        store result storage rc_smashing:temp score int 1 scoreboard players set #score rc_smashing.leaderboard $(score)
+        data modify storage rc_smashing:temp uuid set value f"{$(uuid)}"
+
+        store result storage rc_smashing:temp index int 1 scoreboard players set #hi rc_smashing.leaderboard 0
+        store result score #highscores_len rc_smashing.leaderboard data get storage rc_smashing:leaderboard highscores.values
+
+        scoreboard players set #current_score rc_smashing.leaderboard -1
+        store result score #current_score rc_smashing.leaderboard data get storage rc_smashing:leaderboard highscores.values[{uuid: f"{$(uuid)}"}].score
+
+        raw # existing score is better
+        if score #current_score rc_smashing.leaderboard >= #score rc_smashing.leaderboard return 0
+
+        # if you're already on the leaderboard remove
+        unless score #current_score rc_smashing.leaderboard matches -1:
+            data remove storage rc_smashing:leaderboard highscores.values[{uuid: f"{$(uuid)}"}]
+
+        raw # no scores in the list yet
+        if score #highscores_len rc_smashing.leaderboard matches 0 return run function ~/no_values {score: $(score), uuid: "$(uuid)"}:
+            store result storage rc_smashing:leaderboard highscores.lowest int 1 scoreboard players get #score rc_smashing.leaderboard
+
+            data modify storage rc_smashing:leaderboard highscores.values append value {score: $(score), uuid: "$(uuid)"}
+
+
+        raw # only one score in the list
+        if score #highscores_len rc_smashing.leaderboard matches 1 return run function ~/one_value {score: $(score), uuid: "$(uuid)"}:
+            store result score #current_score rc_smashing.leaderboard data get storage rc_smashing:leaderboard highscores.values[0].score
+
+            raw # other player's lower, so just and ours to the front and continue
+            if score #current_score rc_smashing.leaderboard < #score rc_smashing.leaderboard return:
+                data modify storage rc_smashing:leaderboard highscores.values prepend value {score: $(score), uuid: "$(uuid)"}
+
+            store result storage rc_smashing:leaderboard highscores.lowest int 1 scoreboard players get #score rc_smashing.leaderboard
+
+            data modify storage rc_smashing:leaderboard highscores.values append value {score: $(score), uuid: "$(uuid)"}
+
+        
+        execute function ~/iter with storage rc_smashing:temp {}:
+            store result score #current_score rc_smashing.leaderboard data get storage rc_smashing:leaderboard highscores.values[$(index)].score
+
+            if score #current_score rc_smashing.leaderboard < #score rc_smashing.leaderboard return:
+                data modify storage rc_smashing:leaderboard highscores.values insert $(index) value {score: $(score), uuid: "$(uuid)"}
+            
+            store result storage rc_smashing:temp index int 1 scoreboard players add #hi rc_smashing.leaderboard 1
+
+            raw # We've reached the end of the highscores list, append our value
+            if score #hi rc_smashing.leaderboard = #highscores_len rc_smashing.leaderboard return:
+                data modify storage rc_smashing:leaderboard highscores.values append value {score: $(score), uuid: "$(uuid)"}
+
+            function ~/ with storage rc_smashing:temp {}
+        
+        raw # if we reached max slots + 1, drop the last score
+        store result score #highscores_len rc_smashing.leaderboard data get storage rc_smashing:leaderboard highscores.values
+        if score #highscores_len rc_smashing.leaderboard matches (NUM_SLOTS+1):
+            data remove storage rc_smashing:leaderboard highscores.values[-1]
+
+        raw # Update the lowest score
+        data modify storage rc_smashing:leaderboard highscores.lowest set from storage rc_smashing:leaderboard highscores.values[-1].score
+
+    function ~/add_score:
+        # as player
+        # with $score : int
+        # with $display : text component
+        function gu:generate
+
+        data modify storage rc_smashing:temp uuid set from storage gu:main out
+        data modify storage rc_smashing:temp score set value $(score)
+        data modify storage rc_smashing:temp display set value $(display)
+
+        execute function ~/insert with storage rc_smashing:temp {}:
+            raw # If the user's current score is higher, we can skip inserting again
+            scoreboard players set #current_score rc_smashing.leaderboard -1
+            $execute store result score #current_score rc_smashing.leaderboard run data get storage rc_smashing:leaderboard database."$(uuid)".score
+            if score #current_score rc_smashing.leaderboard matches $(score).. return 0
+
+            raw # Insert the score
+            $data modify storage rc_smashing:leaderboard database."$(uuid)" set value {score: $(score), display: $(display)}
+            raw # Mark the data as dirty
+            $data modify storage rc_smashing:leaderboard dirty."$(uuid)" set value 1b
+            raw # Add the key if the user wasn't registered before
+            unless data storage rc_smashing:leaderboard keys[{uuid: f"{$(uuid)}"}] data modify storage rc_smashing:leaderboard keys append value {uuid: f"{$(uuid)}"}
+
+            function CHECK_SCORES with storage rc_smashing:temp {}
+            if data storage rc_smashing:leaderboard highscores.values[{uuid: f"{$(uuid)}"}] run advancement grant @s only summit.sticker_book:rc_smashing/top_10
+            function UPDATE_DISPLAY
+
+    function ~/on_sync:
+        data modify storage rc_smashing:temp score set from storage rc_smashing:leaderboard database."$(uuid)".score
+        data modify storage rc_smashing:temp uuid set value f"{$(uuid)}"
+        function CHECK_SCORES with storage rc_smashing:temp {}
+        function UPDATE_DISPLAY
+
+    function UPDATE_DISPLAY:
+        LEADERBOARD_NAMES_ROOT = "52ac2f3a-98f6-49a0-84d3-09bc409792ad"
+        store result score #highscores_len rc_smashing.leaderboard data get storage rc_smashing:leaderboard highscores.values
+        if score #highscores_len rc_smashing.leaderboard matches 0 run return 0
+        store result storage rc_smashing:temp index int 1 scoreboard players set #i rc_smashing.leaderboard 0
+        # we need to read `rc_smashing:leaderboard highscores.values`, better scores first
+        as LEADERBOARD_NAMES_ROOT function ~/iter with storage rc_smashing:temp {}:
+            # with $index
+            # `rc_smashing:leaderboard database."$(uuid)".display`
+            $data modify storage rc_smashing:temp uuid set from storage rc_smashing:leaderboard highscores.values[$(index)].uuid
+            with storage rc_smashing:temp {}:
+                $data modify entity @s text set from storage rc_smashing:leaderboard database."$(uuid)".display
+                if score #i rc_smashing.leaderboard matches 0 run data modify entity @s text.extra[0].color set value "aqua"
+                if score #i rc_smashing.leaderboard matches 1 run data modify entity @s text.extra[0].color set value "green"
+                if score #i rc_smashing.leaderboard matches 2 run data modify entity @s text.extra[0].color set value "yellow"
+            # continue if more
+            store result storage rc_smashing:temp index int 1 scoreboard players add #i rc_smashing.leaderboard 1
+            if score #i rc_smashing.leaderboard < #highscores_len rc_smashing.leaderboard on passengers run function ~/ with storage rc_smashing:temp {}

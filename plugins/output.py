@@ -7,7 +7,7 @@ import json
 import os
 from pathlib import Path
 import shutil
-
+import zipfile
 
 def clear(ctx: Context):
     shutil.rmtree("out",ignore_errors=True)
@@ -17,14 +17,22 @@ def beet_default(ctx: Context):
     ctx.data[Module].clear()
     
     # minify json for release pack
-    ctx.require(format_json(indent=None, separators=(",", ":"), final_newline=False))
+    # ctx.require(format_json(indent=None, separators=(",", ":"), final_newline=False))
     
-    zip_name = f"{ctx.minecraft_version}_{ctx.project_name}_v{ctx.project_version}"
+    data_zip_name = f"{ctx.minecraft_version}_{ctx.project_name}_DP"
     ctx.data.save(
-        path = Path("out") / zip_name,
+        path = Path("out") / data_zip_name,
+        zipped=True,
+        overwrite=True,
+    )
+        
+    
+    assets_zip_name = f"{ctx.minecraft_version}_{ctx.project_name}_RP"
+    ctx.assets.save(
+        path = Path("out") / assets_zip_name,
         zipped=True,
         overwrite=True,
     )
     
     # reset for dev output pack
-    ctx.require(format_json(indent=2, separators=(",", ":"), final_newline=True))
+    # ctx.require(format_json(indent=2, separators=(",", ":"), final_newline=True))
