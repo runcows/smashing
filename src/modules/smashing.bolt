@@ -29,6 +29,8 @@ LOC_BEDROCK = "-98.5 79.5 159.5"
 
 PRED_IN_BOOTH = "summit.booth:rc_smashing/in_booth"
 
+TAG_BOOTH_ENTITY = "summit.booth_entity.rc_smashing"
+
 TAG_ARROW = "rc_smashing.moving_arrow"
 
 TAG_ACTIVE_PLAYER = "summit.activity.active.rc_smashing.shoot_out"
@@ -161,14 +163,14 @@ function ./activity:
         scoreboard players set $shoot_cooldown SCORE_MISC 5
 
         store success score $valid_shot rc_smashing.misc if entity @s[y_rotation=120..260,x_rotation=-35..40]
-        anchored eyes positioned ^ ^ ^ as @n[
+        anchored eyes positioned ^ ^ ^ as @e[
             type=arrow,
-            distance=..1,
-            nbt={item:{id:"minecraft:melon",components:{"minecraft:custom_data":{id:"rc_smashing:arrow"}}}}
-        ]:
+            distance=..1
+        ] if items entity @s contents minecraft:melon[minecraft:custom_data~{id:"rc_smashing:arrow"}]:
             # for invalid shots, no poof as it would be in the players face
             if score $valid_shot rc_smashing.misc matches 0 return run kill @s
             tag @s add TAG_ARROW
+            tag @s add TAG_BOOTH_ENTITY
 
 
     function START:
@@ -203,7 +205,7 @@ function ./activity:
             rotate @s 180 0
 
             kill @e[type=item_display,tag=rc_smashing.sittable_display] 
-            summon item_display ~ ~0.7 ~ {Tags:["rc_smashing.sittable_display"]}
+            summon item_display ~ ~0.7 ~ {Tags:["rc_smashing.sittable_display",TAG_BOOTH_ENTITY]}
             ride @s mount @e[type=item_display,tag=rc_smashing.sittable_display,distance=..1,limit=1]
             
             bossbar set rc_smashing:shoot_out players @s
