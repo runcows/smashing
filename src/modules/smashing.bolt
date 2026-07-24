@@ -331,7 +331,7 @@ function ./activity:
                 data modify storage STORAGE_TEMP player.name set from block ~ ~-1 ~ item.components."minecraft:profile".name
 
                 with storage STORAGE_TEMP player:
-                    data modify storage STORAGE_TEMP player.display set value ["",{text:f"{$(name)}"},{text:" - ",color:"gray"},{text:f"{$(minutes)}:{$(seconds)}"}]
+                    data modify storage STORAGE_TEMP player.display set value ["",{text:f"{$(name)}",color:"red"},{text:" - ",color:"gray"},{text:f"{$(minutes)}:{$(seconds)}"}]
                 
                 data merge entity NEW_PB_DISPLAY {
                     text_opacity:-1,
