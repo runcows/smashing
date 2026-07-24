@@ -13,7 +13,6 @@ function rc_smashing:leaderboard:
         data modify storage rc_smashing:leaderboard highscores set value {values:[], lowest: -1}
 
         function PROCESS
-        schedule function UPDATE_DISPLAY 10s
 
     function PROCESS:
         scoreboard players set #count rc_smashing.leaderboard 0
