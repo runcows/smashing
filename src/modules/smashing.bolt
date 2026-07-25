@@ -302,7 +302,7 @@ function ./activity:
             scoreboard players set $between SCORE_TIME -1
             as @e[type=marker,tag=TAG_TARGET,tag=TAG_ACTIVE_TARGET,predicate=PRED_IN_ARENA] at @s:
                 if entity @s[tag=!TAG_DIFF_3,tag=!TAG_NO_POT] store result score $rand SCORE_MISC run random value 1..5
-                if entity @s[tag=TAG_DIFF_3] store result score $rand SCORE_MISC run random value 1..4
+                unless entity @s[tag=!TAG_DIFF_3,tag=!TAG_NO_POT] store result score $rand SCORE_MISC run random value 1..4
                 if score $rand SCORE_MISC matches 1..2 run return run setblock ~ ~ ~ minecraft:melon strict
                 if score $rand SCORE_MISC matches 3..4 run return run setblock ~ ~ ~ minecraft:pumpkin strict
                 if score $rand SCORE_MISC matches 5 run return run setblock ~ ~ ~ minecraft:decorated_pot strict
