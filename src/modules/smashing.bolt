@@ -212,7 +212,7 @@ function ./activity:
             bossbar set rc_smashing:shoot_out players @s
 
             raw # save inventory
-            function summit.inventory_mananagement:save
+            function summit.inventory_management:save
             
             item replace entity @s weapon.mainhand with minecraft:crossbow[
                 charged_projectiles=[{
@@ -358,7 +358,7 @@ function ./activity:
                 as @a[tag=TAG_ACTIVE_PLAYER,limit=1]:
                     ride @s dismount
                     clear @s minecraft:crossbow[minecraft:custom_data~{id:"rc_smashing:crossbow"}]
-                    function summit.inventory_mananagement:load
+                    function summit.inventory_management:load
                 kill @e[type=item_display,tag=rc_smashing.sittable_display]
                 at @e[type=marker,tag=TAG_TARGET,predicate=PRED_IN_ARENA] run setblock ~ ~ ~ air strict
                 function ARENA_CLEAR
