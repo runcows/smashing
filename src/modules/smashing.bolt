@@ -38,6 +38,7 @@ TAG_ACTIVE_PLAYER = "summit.activity.active.rc_smashing.shoot_out"
 TAG_TARGET = "rc_smashing.shoot_out.target"
 TAG_ACTIVE_TARGET = "rc_smashing.shoot_out.active_target"
 TAG_TARGET_BLOCKED = "rc_smashing.shoot_out.blocked_target"
+TAG_NO_POT = "rc_smashing.shoot_out.target.no_pot"
 
 TAG_DIFF_1 = "rc_smashing.shoot_out.target.difficulty_1"
 TAG_DIFF_2 = "rc_smashing.shoot_out.target.difficulty_2"
@@ -300,7 +301,7 @@ function ./activity:
         if score $between SCORE_TIME matches 0:
             scoreboard players set $between SCORE_TIME -1
             as @e[type=marker,tag=TAG_TARGET,tag=TAG_ACTIVE_TARGET,predicate=PRED_IN_ARENA] at @s:
-                if entity @s[tag=!TAG_DIFF_3] store result score $rand SCORE_MISC run random value 1..5
+                if entity @s[tag=!TAG_DIFF_3,tag=!TAG_NO_POT] store result score $rand SCORE_MISC run random value 1..5
                 if entity @s[tag=TAG_DIFF_3] store result score $rand SCORE_MISC run random value 1..4
                 if score $rand SCORE_MISC matches 1..2 run return run setblock ~ ~ ~ minecraft:melon strict
                 if score $rand SCORE_MISC matches 3..4 run return run setblock ~ ~ ~ minecraft:pumpkin strict
