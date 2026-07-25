@@ -296,7 +296,7 @@ function ./activity:
                 tag @e[type=marker,tag=TAG_TARGET,tag=TAG_DIFF_1,sort=random,limit=4,predicate=PRED_IN_ARENA] add TAG_ACTIVE_TARGET
                 tag @e[type=marker,tag=TAG_TARGET,tag=TAG_DIFF_2,sort=random,limit=5,predicate=PRED_IN_ARENA] add TAG_ACTIVE_TARGET
                 tag @e[type=marker,tag=TAG_TARGET,tag=TAG_DIFF_3,sort=random,limit=3,predicate=PRED_IN_ARENA] add TAG_ACTIVE_TARGET
-            if score $round SCORE_MISC matches 6 run function END
+            if score $round SCORE_MISC matches 6 run return run function END
         if score $between SCORE_TIME matches 0:
             scoreboard players set $between SCORE_TIME -1
             as @e[type=marker,tag=TAG_TARGET,tag=TAG_ACTIVE_TARGET,predicate=PRED_IN_ARENA] at @s:
@@ -410,9 +410,10 @@ function ./activity:
         }
         function ARENA_CLEAR
     
-    append_f_tag("summit:reset_player", RESET_PLAYER)
+    append_f_tag("summit:api/reset_player", RESET_PLAYER)
     function RESET_PLAYER:
         bossbar set rc_smashing:shoot_out players @a[tag=TAG_ACTIVE_PLAYER,limit=1]
+        # also need to remove the crossbow i think, but actually maybe rx's work will do that
 
     runcows_mannequin = "fca8b17f-0639-4d24-9bf1-bbdae9ab1954"
     jesse_mannequin = "ed43d78e-0865-4d9c-9434-c70d59d04c8a"
