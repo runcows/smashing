@@ -102,6 +102,8 @@ function ./activity:
     ARENA_BLOCK = ~/arena_block
     ARENA_CLEAR = ~/arena_clear
 
+    POST_QUEUE_CHECK = ~/post_queue_check
+
     PRED_IN_ARENA = ~/in_arena
 
     MODIFY_RELOAD = ~/reload
@@ -409,6 +411,18 @@ function ./activity:
         }
         function ARENA_CLEAR
     
+    ENQUEUE_DISPLAY = "c082b677-96af-47ec-bb1d-e247a7c81b1c"
+    QUEUE_LEN_DISPLAY = "9a202688-665d-4cef-bd24-2a65ecd1333b"
+    append_f_tag("summit.activity:api/post_queue_check/rc_smashing.crackshot",POST_QUEUE_CHECK)
+    function POST_QUEUE_CHECK:
+        store result score #status SCORE_MISC positioned LOC_ACTIVITY run scoreboard players get @e[type=marker,tag=summit.activity.rc_smashing.shoot_out,limit=1,distance=..0.1] summit.activity.status
+        if score #status SCORE_MISC matches 0 run return:
+            data modify entity ENQUEUE_DISPLAY text set value "Play It"
+            data modify entity QUEUE_LEN_DISPLAY text set value ""
+        store result score #exists SCORE_MISC run function summit.activity:api/get_queue_len {booth_id:"rc_smashing",activity_id:"shoot_out"}
+        data modify entity ENQUEUE_DISPLAY text set value "Join\nQueue"
+        data modify entity QUEUE_LEN_DISPLAY text set value ["Queue Length\n",{score:{name: "#exists", objective: SCORE_MISC}}]
+
     append_f_tag("summit:api/reset_player", RESET_PLAYER)
     function RESET_PLAYER:
         bossbar set rc_smashing:shoot_out players @a[tag=TAG_ACTIVE_PLAYER,limit=1]
