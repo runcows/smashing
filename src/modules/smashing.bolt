@@ -324,15 +324,13 @@ function ./activity:
 
                 data remove storage STORAGE_TEMP player
                 store result storage STORAGE_TEMP player.score int 1 run scoreboard players get @s rc_smashing.leaderboard
-                # store result storage STORAGE_TEMP player.time int 1 run scoreboard players get $time SCORE_TIME
-                store result storage STORAGE_TEMP player.seconds int 1 run scoreboard players get $seconds SCORE_TIME
-                store result storage STORAGE_TEMP player.minutes int 1 run scoreboard players get $minutes SCORE_TIME
-
+                data modify storage STORAGE_TEMP player.time set from entity TIMER_DISPLAY text
+                
                 loot replace block ~ ~-1 ~ contents loot summit:technical/player_head
                 data modify storage STORAGE_TEMP player.name set from block ~ ~-1 ~ item.components."minecraft:profile".name
 
                 with storage STORAGE_TEMP player:
-                    data modify storage STORAGE_TEMP player.display set value ["",{text:f"{$(name)}",color:"red"},{text:" - ",color:"gray"},{text:f"{$(minutes)}:{$(seconds)}"}]
+                    data modify storage STORAGE_TEMP player.display set value ["",{text:f"{$(name)}",color:"red"},{text:" - ",color:"gray"},$(time)]
                 
                 data merge entity NEW_PB_DISPLAY {
                     text_opacity:-1,
