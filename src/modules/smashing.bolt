@@ -94,6 +94,7 @@ function ./init:
 function ./activity:
     raw # this is a placeholder function to make bolt happy
     START = ~/start
+    INTRO = ~/intro
     TICK = ~/tick
     SHOOT = ~/shoot
     END = ~/end
@@ -177,7 +178,8 @@ function ./activity:
 
 
     function START:
-        schedule function TICK 1t
+        # schedule function TICK 1t
+        schedule function INTRO 1t
 
         scoreboard players set $shoot_cooldown SCORE_MISC 0
         scoreboard players set $round SCORE_MISC 0
@@ -187,6 +189,7 @@ function ./activity:
         scoreboard players set $between SCORE_TIME -1
 
         data modify entity TIMER_DISPLAY text_opacity set value -1
+        data modify entity TIMER_DISPLAY text set value "0:00"
         data merge entity NEW_PB_DISPLAY {
             text_opacity:0,
             text:"",
@@ -199,7 +202,10 @@ function ./activity:
         bossbar set rc_smashing:shoot_out color red
 
         at @e[type=marker,tag=TAG_TARGET,predicate=PRED_IN_ARENA] run setblock ~ ~ ~ air strict
+
         function ARENA_BLOCK
+        raw # need this block for the intro
+        setblock -86 73 171 minecraft:melon strict
         raw # get out of my arena >:(
         tp @a[predicate=PRED_IN_ARENA,tag=!TAG_ACTIVE_PLAYER] -96.5 69.0 175.5
 
@@ -210,8 +216,6 @@ function ./activity:
             kill @e[type=item_display,tag=rc_smashing.sittable_display] 
             summon item_display ~ ~0.7 ~ {Tags:["rc_smashing.sittable_display",TAG_BOOTH_ENTITY]}
             ride @s mount @e[type=item_display,tag=rc_smashing.sittable_display,distance=..1,limit=1]
-            
-            bossbar set rc_smashing:shoot_out players @s
 
             raw # save inventory
             function summit.inventory_management:save
@@ -225,6 +229,71 @@ function ./activity:
                 !damage
             ]
     
+    function INTRO:
+        raw # this needs to be just a pared down version of the tick function + some other stuff
+        raw # keep time so we can add a timeout i think. >2 minutes here and you get kicked sozzy
+        scoreboard players add $time SCORE_TIME 1
+        if score $time SCORE_MISC matches 2400.. run return:
+            data modify entity TIMER_DISPLAY text_opacity set value 0
+            data merge entity NEW_PB_DISPLAY {
+                text_opacity:0,
+                text:"",
+                transformation:{scale:[0.0f,0.0f,0.0f]}
+            }
+            as @a[tag=TAG_ACTIVE_PLAYER,limit=1]:
+                title @s actionbar "Timed out for the crackshot intro"
+                ride @s dismount
+                clear @s minecraft:crossbow[minecraft:custom_data~{id:"rc_smashing:crossbow"}]
+                function summit.inventory_management:load
+            kill @e[type=item_display,tag=rc_smashing.sittable_display]
+            at @e[type=marker,tag=TAG_TARGET,predicate=PRED_IN_ARENA] run setblock ~ ~ ~ air strict
+            function ARENA_CLEAR
+            function summit.activity:api/end_activity {booth_id:"rc_smashing",activity_id:"shoot_out"}
+        raw # end intro if melon got broke
+        unless block -86 73 171 minecraft:melon run return:
+            scoreboard players set $time SCORE_TIME 0
+            bossbar set rc_smashing:shoot_out players @a[tag=TAG_ACTIVE_PLAYER,limit=1]
+            schedule function TICK 20t
+        raw # otherwise schedule again
+        schedule function INTRO 1t
+        raw # shooting logic, see comment in tick function
+        as @e[tag=TAG_ARROW,predicate=PRED_IN_ARENA,predicate=PRED_NOT_MOVING,type=arrow] function ~/attempt_smash:
+            scoreboard players set $valid_block SCORE_MISC 0
+            positioned LOC_BEDROCK function ./arrow/check_block with entity @s inBlockState:
+                $setblock ~ ~ ~ $(Name) strict
+                store result score $valid_block SCORE_MISC if block ~ ~ ~ #rc_smashing:arrow_smashable
+                setblock ~ ~ ~ bedrock strict
+
+            if score $valid_block SCORE_MISC matches 0 at @s return run function ~/fail:
+                kill @s
+                particle minecraft:item{item:{id:"minecraft:arrow"}} ~ ~ ~ 0.01 0.01 0.01 0.1 25 normal @a[distance=..20]
+                particle minecraft:small_gust ~ ~ ~ 0 0 0 1 1 normal @a[distance=..20]
+            at @s function ~/succeed with entity @s inBlockState:
+                $fill ~-0.07 ~-0.07 ~-0.07 ~0.07 ~0.07 ~0.07 air replace $(Name)
+                $particle minecraft:dust_pillar{block_state:{Name:"$(Name)"}} ~ ~ ~ 0.01 0.01 0.01 1 25 normal @a[distance=..20]
+                $particle minecraft:block{block_state:{Name:"$(Name)"}} ~ ~ ~ 0.25 0.25 0.25 1 75 normal @a[distance=..20]
+                kill @s
+                particle minecraft:item{item:{id:"minecraft:arrow"}} ~ ~ ~ 0.01 0.01 0.01 0.1 25 normal @a[distance=..20]
+                playsound minecraft:entity.arrow.hit_player player @a[tag=TAG_ACTIVE_PLAYER,limit=1] ~ ~ ~ 20 1
+        # player logic | reload
+        as @a[tag=TAG_ACTIVE_PLAYER,limit=1] at @s:
+            raw # action bar tell them to shoot the melon to start
+            title @s actionbar "Shoot the melon to start"
+            if predicate {condition:"minecraft:inverted",term:{condition:"minecraft:entity_properties",entity:"this",predicate:{"minecraft:vehicle":{}}}}:
+                ride @s mount @n[type=item_display,tag=rc_smashing.sittable_display]
+            if score $shoot_cooldown SCORE_MISC matches -1:
+                unless items entity @s weapon.* minecraft:crossbow[minecraft:custom_data~{id:"rc_smashing:crossbow"}] run return fail
+                
+                item modify entity @s weapon.mainhand MODIFY_RELOAD
+                item modify entity @s weapon.offhand MODIFY_RELOAD
+                
+                playsound minecraft:item.crossbow.loading_end player @a[distance=..10] ~ ~ ~ 100
+                scoreboard players set $shoot_cooldown SCORE_MISC -2
+            if score $shoot_cooldown SCORE_MISC matches 0.. run scoreboard players remove $shoot_cooldown SCORE_MISC 1
+        
+
+
+
     function TICK:
         schedule function TICK 1t
         scoreboard players add $time SCORE_TIME 1
