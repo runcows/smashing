@@ -53,13 +53,17 @@ STORAGE_SCORES = "rc_smashing:crackshot"
 TIMER_DISPLAY = "b0974593-2566-4434-a3bc-72ce5e275400"
 NEW_PB_DISPLAY = "e97d5108-be9d-4b54-9dbd-5322d953c9b4"
 def update_time():
+    scoreboard players operation $ticks SCORE_TIME = $time SCORE_TIME
+    scoreboard players operation $ticks SCORE_TIME %= #20 SCORE_TIME
+    unless score $ticks SCORE_TIME matches 0 run return 0
+    raw # re-calc time only every 20 ticks, we dont need any faster
     scoreboard players operation $seconds SCORE_TIME = $time SCORE_TIME
     scoreboard players operation $seconds SCORE_TIME /= #20 SCORE_TIME
     scoreboard players operation $minutes SCORE_TIME = $seconds SCORE_TIME
     scoreboard players operation $minutes SCORE_TIME /= #60 SCORE_TIME
     scoreboard players operation $seconds SCORE_TIME %= #60 SCORE_TIME
     scoreboard players reset $sec_fill SCORE_TIME
-    # Decided im not going to do smaller units than seconds for display
+    raw # Decided im not going to do smaller units than seconds for display
     if score $seconds SCORE_TIME matches ..9 run scoreboard players set $sec_fill SCORE_TIME 0
     data modify entity TIMER_DISPLAY text set value [
         {score:{name:"$minutes",objective:SCORE_TIME}},
@@ -67,6 +71,7 @@ def update_time():
         {score:{name:"$sec_fill",objective:SCORE_TIME}},
         {score:{name:"$seconds",objective:SCORE_TIME}}
     ]
+    raw f"playsound minecraft:item.spyglass.stop_using player @a[tag={TAG_ACTIVE_PLAYER},limit=1] {LOC_ACTIVITY} 100 1.5"
 
 append_f_tag("minecraft:load", (./init))
 function ./init:
@@ -297,7 +302,8 @@ function ./activity:
     function TICK:
         schedule function TICK 1t
         scoreboard players add $time SCORE_TIME 1
-        update_time()
+        execute run function ~/update_time:
+            update_time()
         # arrow smashing
         raw # I've perf tested this selector specifically for release Smashing and this is the best order
         as @e[tag=TAG_ARROW,predicate=PRED_IN_ARENA,predicate=PRED_NOT_MOVING,type=arrow] function ~/attempt_smash:
