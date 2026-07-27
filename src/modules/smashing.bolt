@@ -413,9 +413,9 @@ function ./activity:
     
     ENQUEUE_DISPLAY = "c082b677-96af-47ec-bb1d-e247a7c81b1c"
     QUEUE_LEN_DISPLAY = "9a202688-665d-4cef-bd24-2a65ecd1333b"
-    append_f_tag("summit.activity:api/post_queue_check/rc_smashing.crackshot",POST_QUEUE_CHECK)
+    append_f_tag("summit.activity:api/post_queue_check/rc_smashing.shoot_out",POST_QUEUE_CHECK)
     function POST_QUEUE_CHECK:
-        store result score #status SCORE_MISC positioned LOC_ACTIVITY run scoreboard players get @e[type=marker,tag=summit.activity.rc_smashing.shoot_out,limit=1,distance=..0.1] summit.activity.status
+        store result score #status SCORE_MISC positioned LOC_ACTIVITY run scoreboard players get @n[type=marker,tag=summit.activity.rc_smashing.shoot_out] summit.activity.status
         if score #status SCORE_MISC matches 0 run return:
             data modify entity ENQUEUE_DISPLAY text set value "Play It"
             data modify entity QUEUE_LEN_DISPLAY text set value ""
