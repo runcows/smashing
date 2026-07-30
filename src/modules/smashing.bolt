@@ -238,7 +238,7 @@ function ./activity:
         raw # this needs to be just a pared down version of the tick function + some other stuff
         raw # keep time so we can add a timeout i think. >2 minutes here and you get kicked sozzy
         scoreboard players add $time SCORE_TIME 1
-        if score $time SCORE_MISC matches 2400.. run return:
+        if score $time SCORE_TIME matches 2400.. run return:
             data modify entity TIMER_DISPLAY text_opacity set value 0
             data merge entity NEW_PB_DISPLAY {
                 text_opacity:0,
