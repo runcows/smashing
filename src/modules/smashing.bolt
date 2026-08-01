@@ -218,9 +218,9 @@ function ./activity:
             tp @s ~ ~ ~
             rotate @s 180 0
 
-            kill @e[type=item_display,tag=rc_smashing.sittable_display] 
-            summon item_display ~ ~0.7 ~ {Tags:["rc_smashing.sittable_display",TAG_BOOTH_ENTITY]}
-            ride @s mount @e[type=item_display,tag=rc_smashing.sittable_display,distance=..1,limit=1]
+            kill @e[type=block_display,tag=rc_smashing.sittable_display] 
+            summon block_display ~ ~0.7 ~ {Tags:["rc_smashing.sittable_display",TAG_BOOTH_ENTITY], block_state: {Name: "minecraft:big_dripleaf", Properties: {facing: "north", tilt: "none", waterlogged: "false"}}, transformation: {left_rotation: [0.0f, 0.0f, 0.0f, 1.0f], right_rotation: [0.0f, 0.0f, 0.0f, 1.0f], scale: [1.0f, 1.0f, 1.0f], translation: [-0.5f, -0.95f, -0.5f]}}
+            ride @s mount @e[type=block_display,tag=rc_smashing.sittable_display,distance=..1,limit=1]
 
             raw # save inventory
             function summit.inventory_management:save
@@ -250,7 +250,7 @@ function ./activity:
                 ride @s dismount
                 clear @s minecraft:crossbow[minecraft:custom_data~{id:"rc_smashing:crossbow"}]
                 function summit.inventory_management:load
-            kill @e[type=item_display,tag=rc_smashing.sittable_display]
+            kill @e[type=block_display,tag=rc_smashing.sittable_display]
             at @e[type=marker,tag=TAG_TARGET,predicate=PRED_IN_ARENA] run setblock ~ ~ ~ air strict
             function ARENA_CLEAR
             function summit.activity:api/end_activity {booth_id:"rc_smashing",activity_id:"shoot_out"}
@@ -285,7 +285,7 @@ function ./activity:
             raw # action bar tell them to shoot the melon to start
             title @s actionbar "Shoot the melon to start"
             if predicate {condition:"minecraft:inverted",term:{condition:"minecraft:entity_properties",entity:"this",predicate:{"minecraft:vehicle":{}}}}:
-                ride @s mount @n[type=item_display,tag=rc_smashing.sittable_display]
+                ride @s mount @n[type=block_display,tag=rc_smashing.sittable_display]
             if score $shoot_cooldown SCORE_MISC matches -1:
                 unless items entity @s weapon.* minecraft:crossbow[minecraft:custom_data~{id:"rc_smashing:crossbow"}] run return fail
                 
@@ -327,7 +327,7 @@ function ./activity:
         # player logic | reload
         as @a[tag=TAG_ACTIVE_PLAYER,limit=1] at @s:
             if predicate {condition:"minecraft:inverted",term:{condition:"minecraft:entity_properties",entity:"this",predicate:{"minecraft:vehicle":{}}}}:
-                ride @s mount @n[type=item_display,tag=rc_smashing.sittable_display]
+                ride @s mount @n[type=block_display,tag=rc_smashing.sittable_display]
             if score $shoot_cooldown SCORE_MISC matches -1:
                 unless items entity @s weapon.* minecraft:crossbow[minecraft:custom_data~{id:"rc_smashing:crossbow"}] run return fail
                 
@@ -436,7 +436,7 @@ function ./activity:
                     ride @s dismount
                     clear @s minecraft:crossbow[minecraft:custom_data~{id:"rc_smashing:crossbow"}]
                     function summit.inventory_management:load
-                kill @e[type=item_display,tag=rc_smashing.sittable_display]
+                kill @e[type=block_display,tag=rc_smashing.sittable_display]
                 at @e[type=marker,tag=TAG_TARGET,predicate=PRED_IN_ARENA] run setblock ~ ~ ~ air strict
                 function ARENA_CLEAR
                 function summit.activity:api/end_activity {booth_id:"rc_smashing",activity_id:"shoot_out"}
@@ -476,7 +476,7 @@ function ./activity:
         schedule clear TICK
         at @e[type=marker,tag=TAG_TARGET,predicate=PRED_IN_ARENA] run setblock ~ ~ ~ air strict
         tag @e[type=marker,tag=TAG_ACTIVE_TARGET,predicate=PRED_IN_ARENA] remove TAG_ACTIVE_TARGET
-        kill @e[type=item_display,tag=rc_smashing.sittable_display]
+        kill @e[type=block_display,tag=rc_smashing.sittable_display]
         data modify entity TIMER_DISPLAY text set value ""
         data modify entity TIMER_DISPLAY text_opacity set value 0
         data merge entity NEW_PB_DISPLAY {
