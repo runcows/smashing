@@ -238,7 +238,7 @@ function ./activity:
         raw # this needs to be just a pared down version of the tick function + some other stuff
         raw # keep time so we can add a timeout i think. >2 minutes here and you get kicked sozzy
         scoreboard players add $time SCORE_TIME 1
-        if score $time SCORE_TIME matches 2400.. run return:
+        if score $time SCORE_TIME matches 1800.. run return:
             data modify entity TIMER_DISPLAY text_opacity set value 0
             data merge entity NEW_PB_DISPLAY {
                 text_opacity:0,
@@ -246,7 +246,7 @@ function ./activity:
                 transformation:{scale:[0.0f,0.0f,0.0f]}
             }
             as @a[tag=TAG_ACTIVE_PLAYER,limit=1]:
-                title @s actionbar "Timed out for the crackshot intro"
+                title @s actionbar "Timed out for the Crackshot intro"
                 ride @s dismount
                 clear @s minecraft:crossbow[minecraft:custom_data~{id:"rc_smashing:crossbow"}]
                 function summit.inventory_management:load
@@ -302,6 +302,8 @@ function ./activity:
     function TICK:
         schedule function TICK 1t
         scoreboard players add $time SCORE_TIME 1
+        raw # timeout if over 9:59
+        if score $time SCORE_TIME matches 11980.. run return run function END
         execute run function ~/update_time:
             update_time()
         # arrow smashing
