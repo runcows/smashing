@@ -79,6 +79,7 @@ function ./init:
     scoreboard objectives add SCORE_TIME dummy
 
     scoreboard players set #2 SCORE_TIME 2
+    scoreboard players set #5 SCORE_TIME 5
     scoreboard players set #10 SCORE_TIME 10
     scoreboard players set #20 SCORE_TIME 20
     scoreboard players set #60 SCORE_TIME 60
@@ -406,8 +407,17 @@ function ./activity:
             bossbar set rc_smashing:shoot_out players @a[tag=rc_smashing.no_one,limit=1]
             advancement grant @s only summit.sticker_book:rc_smashing/participate
             if score $time SCORE_TIME matches ..1000 run advancement grant @s only summit.sticker_book:rc_smashing/fast
+            raw # calc milliseconds
+            scoreboard players operation $ticks SCORE_TIME = $time SCORE_TIME
+            scoreboard players operation $ticks SCORE_TIME %= #20 SCORE_TIME
+            store result storage STORAGE_TEMP ms int 1 run scoreboard players operation $ticks SCORE_TIME *= #5 SCORE_TIME
+            if score $ticks SCORE_TIME matches 0 run data modify storage STORAGE_TEMP ms set value "00"
+            if score $ticks SCORE_TIME matches 5 run data modify storage STORAGE_TEMP ms set value "05"
+            data modify storage STORAGE_TEMP time set from entity TIMER_DISPLAY text
+            with storage STORAGE_TEMP {}:
+                data modify entity TIMER_DISPLAY text set value [$(time),".$(ms)"]
+            raw # new PB stuff
             unless score @s SCORE_TIME <= $time SCORE_TIME positioned LOC_BEDROCK:
-                # new PB
                 scoreboard players operation @s SCORE_TIME = $time SCORE_TIME
 
                 scoreboard players operation @s rc_smashing.leaderboard = #INT_MAX SCORE_TIME
@@ -422,7 +432,7 @@ function ./activity:
 
                 with storage STORAGE_TEMP player:
                     data modify storage STORAGE_TEMP player.display set value ["",{text:f"{$(name)}",color:"red"},{text:" - ",color:"gray"},$(time)]
-                
+
                 data merge entity NEW_PB_DISPLAY {
                     text_opacity:-1,
                     text:{color:"gold",text:"New Personal\nBest",bold:true},
