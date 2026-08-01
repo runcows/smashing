@@ -22,11 +22,11 @@
         "obtained_text": "Earned for playing a game of Smashing Crackshot"
       },
       {
-        "sticker_id": "top_10",
-        "sticker_texture": "rc_smashing:sticker/top_10",
+        "sticker_id": "fast",
+        "sticker_texture": "rc_smashing:sticker/fast",
         "sticker_name": "Shattering",
-        "unobtained_text": "Earn a Top 10 Score in Smashing Crackshot",
-        "obtained_text": "Earned for getting a Top 10 Score in Smashing Crackshot"
+        "unobtained_text": "Get a time of 50 seconds or less in Smashing Crackshot",
+        "obtained_text": "Earned for getting a time of 50 seconds or less in Smashing Crackshot"
       }
     ]
   },

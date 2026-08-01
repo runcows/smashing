@@ -139,7 +139,6 @@ function rc_smashing:leaderboard:
             unless data storage rc_smashing:leaderboard keys[{uuid: f"{$(uuid)}"}] data modify storage rc_smashing:leaderboard keys append value {uuid: f"{$(uuid)}"}
 
             function CHECK_SCORES with storage rc_smashing:temp {}
-            if data storage rc_smashing:leaderboard highscores.values[{uuid: f"{$(uuid)}"}] run advancement grant @s only summit.sticker_book:rc_smashing/top_10
             function UPDATE_DISPLAY
 
     function ~/on_sync:
