@@ -190,6 +190,7 @@ function ./activity:
         scoreboard players set $round SCORE_MISC 0
         scoreboard players set $new_best SCORE_MISC 0
 
+        scoreboard players set $stand SCORE_TIME 0
         scoreboard players set $time SCORE_TIME 0
         scoreboard players set $between SCORE_TIME -1
 
@@ -328,8 +329,18 @@ function ./activity:
                 playsound minecraft:entity.arrow.hit_player player @a[tag=TAG_ACTIVE_PLAYER,limit=1] ~ ~ ~ 20 1
         # player logic | reload
         as @a[tag=TAG_ACTIVE_PLAYER,limit=1] at @s:
-            if predicate {condition:"minecraft:inverted",term:{condition:"minecraft:entity_properties",entity:"this",predicate:{"minecraft:vehicle":{}}}}:
+            execute run function ~/sit_check:
+                if predicate {condition:"minecraft:entity_properties",entity:"this",predicate:{"minecraft:vehicle":{}}} run return:
+                    scoreboard players set $stand SCORE_TIME 0
                 ride @s mount @n[type=block_display,tag=rc_smashing.sittable_display]
+                scoreboard players add $stand SCORE_TIME 1
+                if score $stand SCORE_TIME matches ..100 return 0
+                raw # abort
+                ride @s dismount
+                clear @s minecraft:crossbow[minecraft:custom_data~{id:"rc_smashing:crossbow"}]
+                function summit.inventory_management:load
+                function ABORT
+                function summit.activity:api/end_activity {booth_id:"rc_smashing",activity_id:"shoot_out"}
             if score $shoot_cooldown SCORE_MISC matches -1:
                 unless items entity @s weapon.* minecraft:crossbow[minecraft:custom_data~{id:"rc_smashing:crossbow"}] run return fail
                 
@@ -477,6 +488,7 @@ function ./activity:
     
     function ABORT:
         schedule clear TICK
+        bossbar set rc_smashing:shoot_out players @a[tag=rc_smashing.no_one,limit=1]
         at @e[type=marker,tag=TAG_TARGET,predicate=PRED_IN_ARENA] run setblock ~ ~ ~ air strict
         tag @e[type=marker,tag=TAG_ACTIVE_TARGET,predicate=PRED_IN_ARENA] remove TAG_ACTIVE_TARGET
         kill @e[type=block_display,tag=rc_smashing.sittable_display]
