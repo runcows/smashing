@@ -2,18 +2,6 @@ from typing import Any
 
 v_major, v_minor, v_patch = ctx.project_version.split(".")
 
-append function_tag load:load {
-    "values": [
-        (./init)
-    ]
-}
-
-function_tag minecraft:tick {
-    "values": [
-        (./tick)
-    ]
-}
-
 def speed_predicate(name: str, speed: Any):
     predicate ("rc_smashing:" + name) {
         "condition": "minecraft:entity_properties",
@@ -62,6 +50,8 @@ forceloaded_marker = "72756E63-6F77-73-BEC7-F04CE104D"
 int_runcows = 3132
 
 function ./init:
+    append function_tag load:load {"values":[(~/)]}
+
     scoreboard players set rc_smashing load.status v_major
     scoreboard players set rc_smashing_minor load.status v_minor
 
@@ -72,13 +62,10 @@ function ./init:
     # UUID = 72756E63-6F77-73-BEC7-F04CE104D    ^ ABOVE
     summon marker 29999999 ~ int_runcows {Tags:["rc_smashing.forceload_marker"],UUID:[I;1920298595,1870069875,-1094254577,80613453]}
 
-    schedule function ./slow_clock 1t
-
-function ./slow_clock:
-    schedule function ./slow_clock 5s
-
-    store result score $mob_griefing_enabled rc_smashing.misc gamerule mob_griefing
-    store result score $projectiles_can_break_blocks rc_smashing.misc gamerule projectiles_can_break_blocks
+    schedule function ./slow_clock 1t:
+        schedule function ~/ 5s
+        store result score $mob_griefing_enabled rc_smashing.misc gamerule mob_griefing
+        store result score $projectiles_can_break_blocks rc_smashing.misc gamerule projectiles_can_break_blocks
 
 function ./check_origin:
     if score $mob_griefing_enabled rc_smashing.misc matches 1 return 1
@@ -91,6 +78,8 @@ function ./check_origin:
     return 1
 
 function ./tick:
+    append function_tag minecraft:tick {"values":[(~/)]}
+
     if score $projectiles_can_break_blocks rc_smashing.misc matches 0 return fail
 
     # reapply piercing arrow data
@@ -137,6 +126,6 @@ function ./tick:
         data modify entity @s data.rc_smashing.prev_motion set from entity @s Motion
 
 function ./smash_block:
-    if data entity @s inBlockState.Properties{waterlogged:"true"} function ./smash_waterlogged_block:
+    if data entity @s inBlockState.Properties{waterlogged:"true"} return run function ./smash_waterlogged_block with entity @s inBlockState:
         $fill ~-0.07 ~-0.07 ~-0.07 ~0.07 ~0.07 ~0.07 water replace $(Name)[waterlogged=true] destroy
     $fill ~-0.07 ~-0.07 ~-0.07 ~0.07 ~0.07 ~0.07 air replace $(Name) destroy
