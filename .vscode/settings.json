@@ -1,6 +1,7 @@
 {
     "workbench.iconTheme": "mc-dp-icons",
     "files.associations": {
-        "*.bolt": "mcfunction"
+        "*.bolt": "mcfunction",
+        "*.mcmeta": "json"
     }
 }
