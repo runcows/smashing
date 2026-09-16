@@ -1,10 +1,10 @@
 [project]
 dependencies = [
-    "beet>=0.115.0",
-    "bolt>=0.50.1",
+    "beet @ git+https://github.com/edayot/beet.git@26.3_update",
+    "bolt @ git+https://github.com/edayot/beet.git@26.3_update#subdirectory=packages/bolt",
     "bolt-native-macros>=0.5.1",
     "jinja2>=3.1.6",
-    "mecha>=0.103.0",
+    "mecha @ git+https://github.com/edayot/beet.git@26.3_update#subdirectory=packages/mecha",
     "pygithub>=2.9.1",
 ]
 description = "The Smashing Datapack Github Repo"
