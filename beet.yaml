@@ -2,9 +2,8 @@ id: rc_smashing
 name: Smashing
 author: runcows
 description: Arrows and Tridents can break more blocks!
-minecraft: "26.3"
 
-version: 1.4.0
+version: 1.4.1
 
 output: out
 
