@@ -84,7 +84,7 @@ def publish(ctx: Context, zip_name: str, jar_name: str):
     if not SMITHED_AUTH:
         raise ValueError("NO SMITHED AUTH KEY")
     if not MODRINTH_AUTH:
-        raise ValueError("No MODRINTH AUTH KEY")
+        raise ValueError("NO MODRINTH AUTH KEY")
     g = Github(GH_TOKEN)
     repo = g.get_repo(REPO_LOCATION)
     release = repo.create_git_tag_and_release(
@@ -101,54 +101,7 @@ def publish(ctx: Context, zip_name: str, jar_name: str):
         gh_release_download_link = asset.browser_download_url
         break
     print(f"Github Release Asset Link : {gh_release_download_link}")
-    
-    # Smithed
-    res = requests.get(f"{SMITHED_API}/packs/{ctx.project_id}")
-    if not (200 <= res.status_code < 300):
-        raise RuntimeError(f"SMITHED: Failed to get project... {res.status_code} {res.text}")
-    project_json = res.json()
-    project_versions = project_json["versions"]
-    project_display = project_json["display"]
-    current_icon = f"https://raw.githubusercontent.com/{REPO_LOCATION}/main/pack.png"
-    current_readme = f"https://raw.githubusercontent.com/{REPO_LOCATION}/main/README.md"
-    if project_display["icon"] != current_icon or project_display["webPage"] != current_readme:
-        print("SMITHED: Updating project readme and icon")
-        res = requests.patch(
-            f"{SMITHED_API}/packs/{ctx.project_id}",
-            params = {'token': SMITHED_AUTH},
-            json = {
-                "data": {
-                    "display": {
-                        "icon": current_icon,
-                        "webPage": current_readme
-                    }
-                }
-            }
-        )
-        if not (200 <= res.status_code < 300):
-            print(f"SMITHED: Failed to update project readme and icon... {res.status_code} {res.text}")
-    matching_version = next((v for v in project_versions if v["name"] == ctx.project_version), None)
-    if matching_version is not None:
-        raise ValueError("SMITHED: Version exists already.")
-    res = requests.post(
-        f"{SMITHED_API}/packs/{ctx.project_id}/versions",
-        params = {'token': SMITHED_AUTH, 'version': ctx.project_version},
-        json = {
-            "data": {
-                "downloads": {
-                    "datapack": gh_release_download_link,
-                    "resourcepack": ""
-                },
-                "name": ctx.project_version,
-                "supports": ctx.meta["supported_versions"],
-                "dependencies": []
-            }
-        }
-    )
-    if not (200 <= res.status_code < 300):
-        raise ValueError(f"SMITHED: Failed to publish... {res.status_code} {res.text}")
-    print(f"SMITHED: {res.text}")
-    
+
     # Modrinth
     USER_AGENT = "Smashing Github Actions"
     res = requests.get(
@@ -204,7 +157,12 @@ def publish(ctx: Context, zip_name: str, jar_name: str):
     )
     if not (200 <= res.status_code < 300):
         raise ValueError(f"MODRINTH: Failed to publish Zip... {res.status_code} {res.text}")
-    print(f"MODRINTH: Successfully Published Zip {res.json()["name"]}")
+    result_json = res.json()
+    print(f"MODRINTH: Successfully Published Zip {result_json["name"]}")
+    modrinth_zip_download_link: str = ""
+    for file in result_json["files"]:
+        modrinth_zip_download_link = file["url"] if (modrinth_zip_download_link == "" and file["url"]) else modrinth_zip_download_link
+        print(f"\tDownload {file["filename"]} at link {file["url"]}")
     # - Post Jar
     with open(f"out/{jar_name}.jar", "rb") as jf:
         jar_bytes = jf.read()
@@ -229,4 +187,56 @@ def publish(ctx: Context, zip_name: str, jar_name: str):
     )
     if not (200 <= res.status_code < 300):
         raise ValueError(f"MODRINTH: Failed to publish Jar... {res.status_code} {res.text}")
-    print(f"MODRINTH: Successfully Published Jar {res.json()["name"]}")
+    result_json = res.json()
+    print(f"MODRINTH: Successfully Published Jar {result_json["name"]}")
+    for file in result_json["files"]:
+        print(f"\tDownload {file["filename"]} at link {file["url"]}")
+    
+    # Smithed
+    res = requests.get(f"{SMITHED_API}/packs/{ctx.project_id}")
+    if not (200 <= res.status_code < 300):
+        raise RuntimeError(f"SMITHED: Failed to get project... {res.status_code} {res.text}")
+    project_json = res.json()
+    project_versions = project_json["versions"]
+    project_display = project_json["display"]
+    current_icon = f"https://raw.githubusercontent.com/{REPO_LOCATION}/main/pack.png"
+    current_readme = f"https://raw.githubusercontent.com/{REPO_LOCATION}/main/README.md"
+    if project_display["icon"] != current_icon or project_display["webPage"] != current_readme:
+        print("SMITHED: Updating project readme and icon")
+        res = requests.patch(
+            f"{SMITHED_API}/packs/{ctx.project_id}",
+            params = {'token': SMITHED_AUTH},
+            json = {
+                "data": {
+                    "display": {
+                        "icon": current_icon,
+                        "webPage": current_readme
+                    }
+                }
+            }
+        )
+        if not (200 <= res.status_code < 300):
+            print(f"SMITHED: Failed to update project readme and icon... {res.status_code} {res.text}")
+    matching_version = next((v for v in project_versions if v["name"] == ctx.project_version), None)
+    if matching_version is not None:
+        raise ValueError("SMITHED: Version exists already.")
+    res = requests.post(
+        f"{SMITHED_API}/packs/{ctx.project_id}/versions",
+        params = {'token': SMITHED_AUTH, 'version': ctx.project_version},
+        json = {
+            "data": {
+                "downloads": {
+                    "datapack": modrinth_zip_download_link,
+                    "resourcepack": ""
+                },
+                "name": ctx.project_version,
+                "supports": ctx.meta["supported_versions"],
+                "dependencies": []
+            }
+        }
+    )
+    if not (200 <= res.status_code < 300):
+        raise ValueError(f"SMITHED: Failed to publish... {res.status_code} {res.text}")
+    print(f"SMITHED: {res.text}")
+    
+    
